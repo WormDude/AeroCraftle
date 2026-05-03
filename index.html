@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AeroCraftle</title>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<h1> AeroCraftle </h1>
+  
+<style>
+body {
+  font-family: Inter, sans-serif;
+  background:#121213;
+  color:white;
+  text-align:center;
+  margin:0;
+}
+
+#main {
+  max-width:420px;
+  margin:40px auto;
+}
+
+#timer, #streakBox {
+  margin-bottom:8px;
+  font-weight:600;
+  opacity:0.8;
+}
+
+#answerReveal {
+  background:#b59b00;
+  color:black;
+  font-weight:700;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:10px;
+  display:none;
+}
+
+#tileWrapper {
+  position:relative;
+  width:100%;
+  margin-bottom:15px;
+}
+
+#baseImage {
+  width:100%;
+  display:block;
+  border-radius:10px;
+}
+
+#tileGrid {
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+}
+
+.tile {
+  background:#111;
+  border:1px solid #000;
+  transition:opacity 0.25s;
+}
+
+.tile.revealed {
+  opacity:0;
+}
+
+#inputRow {
+  display:flex;
+  gap:8px;
+}
+
+#input {
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#1a1a1b;
+  color:white;
+  outline:none;
+}
+
+#guessBtn {
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#3a3a3c;
+  color:white;
+  cursor:pointer;
+}
+
+#dropdown {
+  background:#1a1a1b;
+  margin-top:5px;
+  border-radius:8px;
+  max-height:150px;
+  overflow-y:auto;
+}
+
+.option {
+  padding:10px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.option:hover,
+.option.selected {
+  background:#3a3a3c;
+}
+
+.row {
+  display:grid;
+  grid-template-columns:1fr 50px 60px;
+  background:#1a1a1b;
+  margin-top:6px;
+  padding:10px;
+  border-radius:8px;
+}
+
+.row.correct {
+  background:#538d4e;
+}
+</style>
+</head>
+
+<body>
+
+<div id="main">
+
+<div id="timer"></div>
+<div id="streakBox"></div>
+<div id="answerReveal"></div>
+
+<div id="tileWrapper">
+  <img id="baseImage">
+  <div id="tileGrid"></div>
+</div>
+
+<div id="inputRow">
+  <input id="input" autocomplete="off">
+  <button id="guessBtn">Guess</button>
+</div>
+
+<div id="dropdown"></div>
+<div id="grid"></div>
+
+</div>
+
+<script>
+
+// ================= DAILY SYSTEM =================
+const DATA = [
+  {
+    name: "Hughes H-4 Hercules",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true"
+  },
+  {
+    name: "General Dynamics F-16 Fighting Falcon",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true"
+  },
+  {
+    name: "Airbus A300-600ST Beluga",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true"
+  },
+  {
+    name: "Boeing 747-400LCF Dreamlifter",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20182707.png?raw=true"
+  },
+  {
+    name: "Antonov A-40",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20195524.png?raw=true"
+  },
+  {
+    name: "Lockheed C-130H Hercules",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true"
+  },
+  {
+    name: "Dornier Seastar",
+    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-07%20062208.png?raw=true"
+  }
+];
+
+function getDailyIndex() {
+  const start = new Date(2024,0,1);
+  const now = new Date();
+  return Math.floor((now - start)/(1000*60*60*24)) % DATA.length;
+}
+
+let current = DATA[getDailyIndex()];
+
+// ================= STORAGE =================
+const today = new Date().toDateString();
+let playedToday = localStorage.getItem("aero_played_day");
+let streak = parseInt(localStorage.getItem("aero_streak") || "0");
+
+let locked = playedToday === today;
+
+// ================= STATE =================
+let guesses = [];
+let gameOver = false;
+
+let selectedIndex = -1;
+let enterOnce = false;
+
+// ================= ELEMENTS =================
+const input = document.getElementById("input");
+const dropdown = document.getElementById("dropdown");
+const grid = document.getElementById("grid");
+
+// ================= TILE SYSTEM =================
+let tiles = [];
+let hidden = [];
+
+function createTiles() {
+  const img = document.getElementById("baseImage");
+  img.src = current.image;
+
+  const grid = document.getElementById("tileGrid");
+  grid.innerHTML = "";
+
+  tiles = [];
+  hidden = [];
+
+  for (let i=0;i<6;i++) {
+    const t = document.createElement("div");
+    t.className="tile";
+    tiles.push(t);
+    hidden.push(i);
+    grid.appendChild(t);
+  }
+}
+
+function revealTile() {
+  if (!hidden.length) return;
+  const r = Math.floor(Math.random()*hidden.length);
+  const i = hidden.splice(r,1)[0];
+  tiles[i].classList.add("revealed");
+}
+
+// ================= TIMER =================
+function updateTimer() {
+  const now = new Date();
+
+  const next = new Date();
+  next.setHours(24, 0, 0, 0);
+
+  let diff = next - now;
+
+  // 🛑 HARD CLAMP: never allow negative values
+  if (diff <= 0) {
+    diff = 0;
+    location.reload(); // safe reset
+    return;
+  }
+
+  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+  document.getElementById("timer").textContent =
+    "Next aircraft in: " + h + ":" + m + ":" + s;
+}
+setInterval(updateTimer,1000);
+
+// ================= STREAK =================
+function updateStreakDisplay() {
+  document.getElementById("streakBox").textContent =
+    "🔥 Streak: " + streak;
+}
+
+function finishGame(win) {
+  if (playedToday === today) return;
+
+  localStorage.setItem("aero_played_day", today);
+
+  if (win) streak++;
+  else streak = 0;
+
+  localStorage.setItem("aero_streak", streak);
+
+  updateStreakDisplay();
+  locked = true;
+}
+
+// ================= ANSWER BOX =================
+function showAnswer() {
+  const box = document.getElementById("answerReveal");
+  box.style.display = "block";
+  box.textContent = "★ Correct Answer: " + current.name;
+}
+
+// ================= GUESS =================
+function submitGuess() {
+  if (locked || gameOver) return;
+
+  const val = input.value.trim();
+  if (!val) return;
+
+  const correct = val.toLowerCase() === current.name.toLowerCase();
+
+  guesses.push(val);
+
+  const row = document.createElement("div");
+  row.className = "row";
+
+  row.innerHTML = `
+    <div>${val}</div>
+    <div>${correct ? "✔" : "✖"}</div>
+    <div>${guesses.length}/6</div>
+  `;
+
+  if (correct) {
+    row.classList.add("correct");
+    gameOver = true;
+    tiles.forEach(t=>t.classList.add("revealed"));
+    finishGame(true);
+  } else {
+    revealTile();
+  }
+
+  grid.appendChild(row);
+
+  if (guesses.length >= 6 && !correct) {
+    gameOver = true;
+    tiles.forEach(t=>t.classList.add("revealed"));
+    showAnswer();
+    finishGame(false);
+  }
+
+  input.value = "";
+  dropdown.innerHTML = "";
+  enterOnce = false;
+}
+
+// ================= DROPDOWN =================
+function showDropdown() {
+  dropdown.innerHTML = "";
+  selectedIndex = -1;
+  enterOnce = false;
+
+  const val = input.value.toLowerCase();
+
+  DATA.map(d=>d.name)
+    .sort((a,b)=>a.localeCompare(b))
+    .filter(n=>n.toLowerCase().includes(val))
+    .forEach(n=>{
+      const d = document.createElement("div");
+      d.className="option";
+      d.textContent=n;
+
+      d.onclick=()=>{
+        input.value=n;
+        dropdown.innerHTML="";
+      };
+
+      dropdown.appendChild(d);
+    });
+}
+
+// ================= KEYBOARD =================
+input.addEventListener("keydown", e=>{
+
+  const opts = [...dropdown.querySelectorAll(".option")];
+
+  if (e.key==="ArrowDown") {
+    e.preventDefault();
+    selectedIndex = (selectedIndex+1)%opts.length;
+    update(opts);
+  }
+
+  if (e.key==="ArrowUp") {
+    e.preventDefault();
+    selectedIndex = (selectedIndex-1+opts.length)%opts.length;
+    update(opts);
+  }
+
+  if (e.key==="Enter") {
+    e.preventDefault();
+
+    if (selectedIndex>=0 && opts[selectedIndex]) {
+      input.value = opts[selectedIndex].textContent;
+      dropdown.innerHTML="";
+      return;
+    }
+
+    if (opts.length) {
+      if (!enterOnce) {
+        input.value = opts[0].textContent;
+        enterOnce = true;
+        return;
+      }
+    }
+
+    submitGuess();
+  }
+});
+
+function update(opts){
+  opts.forEach(o=>o.classList.remove("selected"));
+  if (opts[selectedIndex]) {
+    opts[selectedIndex].classList.add("selected");
+  }
+}
+
+// ================= INIT =================
+createTiles();
+updateStreakDisplay();
+updateTimer();
+
+document.getElementById("guessBtn").onclick = submitGuess;
+input.addEventListener("input", showDropdown);
+input.addEventListener("focus", showDropdown);
+
+// lock UI if already played
+if (locked) {
+
+  // disable gameplay
+  input.disabled = true;
+  document.getElementById("guessBtn").disabled = true;
+
+  // reveal full aircraft image
+  const img = document.getElementById("baseImage");
+  img.src = current.image;
+
+  // remove all tiles (no hiding)
+  document.getElementById("tileGrid").innerHTML = "";
+
+  // show message
+  const box = document.getElementById("answerReveal");
+  box.style.display = "block";
+  box.textContent = "★ Already played today. Come back tomorrow. Answer: " + current.name;
+}
+
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
