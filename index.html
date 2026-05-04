@@ -1,453 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <head>
-  <meta charset="UTF-8">
-  <title>AeroCraftle – Daily Aircraft Game</title>
-  <link rel="icon" type="image/png" href="https://github.com/WormDude/AeroCraftle/blob/main/image_2026-05-03_151522057.png?raw=true">
-</head>
-    
-  <body>
-  <!DOCTYPE html>
-<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>AeroCraftle – Daily Aircraft Game</title>
-
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<h1> AeroCraftle </h1>
-  
-<style>
-body {
-  font-family: Inter, sans-serif;
-  background:#121213;
-  color:white;
-  text-align:center;
-  margin:0;
-}
-
-#main {
-  max-width:420px;
-  margin:40px auto;
-}
-
-#timer, #streakBox {
-  margin-bottom:8px;
-  font-weight:600;
-  opacity:0.8;
-}
-
-#answerReveal {
-  background:#b59b00;
-  color:black;
-  font-weight:700;
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:10px;
-  display:none;
-}
-
-#tileWrapper {
-  position:relative;
-  width:100%;
-  margin-bottom:15px;
-}
-
-#baseImage {
-  width:100%;
-  display:block;
-  border-radius:10px;
-}
-
-#tileGrid {
-  position:absolute;
-  inset:0;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(2,1fr);
-}
-
-.tile {
-  background:#111;
-  border:1px solid #000;
-  transition:opacity 0.25s;
-}
-
-.tile.revealed {
-  opacity:0;
-}
-
-#inputRow {
-  display:flex;
-  gap:8px;
-}
-
-#input {
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:#1a1a1b;
-  color:white;
-  outline:none;
-}
-
-#guessBtn {
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:#3a3a3c;
-  color:white;
-  cursor:pointer;
-}
-
-#dropdown {
-  background:#1a1a1b;
-  margin-top:5px;
-  border-radius:8px;
-  max-height:150px;
-  overflow-y:auto;
-}
-
-.option {
-  padding:10px;
-  text-align:left;
-  cursor:pointer;
-}
-
-.option:hover,
-.option.selected {
-  background:#3a3a3c;
-}
-
-.row {
-  display:grid;
-  grid-template-columns:1fr 50px 60px;
-  background:#1a1a1b;
-  margin-top:6px;
-  padding:10px;
-  border-radius:8px;
-}
-
-.row.correct {
-  background:#538d4e;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>AeroCraftle – Aircraft Guessing Game</title>
+    <link rel="icon" type="image/png" href="https://github.com/WormDude/AeroCraftle/blob/main/image_2026-05-03_151522057.png?raw=true">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #121213; color: white; text-align: center; margin: 0; padding-bottom: 50px; }
+        #main { max-width: 420px; margin: 40px auto; padding: 0 15px; position: relative; }
+        #modeToggle { position: absolute; top: -35px; right: 15px; background: #538d4e; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; z-index: 10; }
+        #timer, #streakBox { margin-bottom: 8px; font-weight: 600; opacity: 0.8; }
+        #answerReveal { background: #b59b00; color: black; font-weight: 700; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        #navBar { display: none; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .nav-btn { background: #3a3a3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; transition: background 0.2s; }
+        .nav-btn.active { background: #538d4e; }
+        #tileWrapper { position: relative; width: 100%; margin-bottom: 20px; min-height: 200px; }
+        #baseImage { width: 100%; display: block; border-radius: 10px; background: #1a1a1b; min-height: 200px; object-fit: contain; }
+        #tileGrid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .tile { background: #111; border: 1px solid #000; transition: opacity 0.4s ease; }
+        .tile.revealed { opacity: 0; }
+        #inputRow { display: flex; gap: 10px; }
+        #input { flex: 1; padding: 14px; border: none; border-radius: 8px; background: #1a1a1b; color: white; outline: none; font-size: 16px; }
+        #input:disabled { opacity: 0.5; cursor: not-allowed; }
+        #guessBtn { padding: 0 20px; border: none; border-radius: 8px; background: #3a3a3c; color: white; cursor: pointer; font-weight: 600; }
+        .big-btn { display: none; width: 100%; margin-top: 15px; padding: 14px; border: none; border-radius: 8px; background: #5a5a5c; color: white; cursor: pointer; font-weight: bold; }
+        #playAgainBtn { background: #538d4e; margin-top: 20px; }
+        #dropdown { background: #1a1a1b; margin-top: 5px; border-radius: 8px; max-height: 200px; overflow-y: auto; text-align: left; }
+        .option { padding: 12px; cursor: pointer; border-bottom: 1px solid #222; }
+        .option:hover { background: #3a3a3c; }
+        .row { display: grid; grid-template-columns: 1fr 50px 60px; background: #1a1a1b; margin-top: 8px; padding: 12px; border-radius: 8px; align-items: center; }
+        .row.correct { background: #538d4e; }
+        .price-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .price-btn { padding: 18px; border-radius: 8px; border: none; background: #3a3a3c; color: white; cursor: pointer; font-weight: 700; font-size: 14px; }
+    </style>
 </head>
 
 <body>
+    <div id="main">
+        <button id="modeToggle" onclick="toggleMode()">Unlimited Mode</button>
+        <h1 id="gameTitle">AeroCraftle</h1>
+        
+        <div id="navBar">
+            <button class="nav-btn" onclick="switchView('main')">Round 1</button>
+            <button class="nav-btn" onclick="switchView('loc')">Bonus 1</button>
+            <button class="nav-btn" onclick="switchView('price')">Bonus 2</button>
+        </div>
 
-<div id="main">
+        <div id="timer">Loading...</div>
+        <div id="streakBox">🔥 Streak: 0</div>
+        <div id="answerReveal"></div>
 
-<div id="timer"></div>
-<div id="streakBox"></div>
-<div id="answerReveal"></div>
+        <div id="tileWrapper">
+            <img id="baseImage">
+            <div id="tileGrid"></div>
+        </div>
 
-<div id="tileWrapper">
-  <img id="baseImage">
-  <div id="tileGrid"></div>
-</div>
+        <div id="inputRow">
+            <input id="input" autocomplete="off" placeholder="Type aircraft name...">
+            <button id="guessBtn">Guess</button>
+        </div>
 
-<div id="inputRow">
-  <input id="input" autocomplete="off">
-  <button id="guessBtn">Guess</button>
-</div>
+        <button id="bonusBtn" class="big-btn">PLAY BONUS ROUND</button>
+        <button id="priceBonusBtn" class="big-btn">PLAY 2ND BONUS ROUND</button>
+        <button id="playAgainBtn" class="big-btn" onclick="resetUnlimited()">PLAY AGAIN</button>
+        
+        <div id="dropdown"></div>
+        <div id="grid"></div>
+    </div>
 
-<div id="dropdown"></div>
-<div id="grid"></div>
-
-</div>
-
-<script>
-
-// ================= DAILY SYSTEM =================
-const DATA = [
-  {
-    name: "Hughes H-4 Hercules",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true"
-  },
-  {
-    name: "General Dynamics F-16 Fighting Falcon",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true"
-  },
-  {
-    name: "Airbus A300-600ST Beluga",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true"
-  },
-  {
-    name: "Boeing 747-400LCF Dreamlifter",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20182707.png?raw=true"
-  },
-  {
-    name: "Antonov A-40",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20195524.png?raw=true"
-  },
-  {
-    name: "Lockheed C-130H Hercules",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true"
-  },
-  {
-    name: "Dornier Seastar",
-    image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-07%20062208.png?raw=true"
-  }
+    <script>
+        const COUNTRIES = [
+    { name: "Eiko", flag: "https://aeronautica.wikioasis.org/wiki/Special:Redirect/file/Flag_of_Eiko.png" },
+    { name: "Fiskar", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/1/1d/Flag_of_Fiskar.png/300px-Flag_of_Fiskar.png" },
+    { name: "United Isles of Oconia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/84/Flag_of_the_United_Isles_of_Oconia.png/1920px-Flag_of_the_United_Isles_of_Oconia.png" },
+    { name: "Jepo", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/f/fb/Flag_of_Jepo.png/300px-Flag_of_Jepo.png" },
+    { name: "Langtang", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/9/98/Flag_of_Langtang.png/300px-Flag_of_Langtang.png" },
+    { name: "Meihua", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/1/1d/Flag_of_Meihua.png/300px-Flag_of_Meihua.png" },
+    { name: "Mengtai", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/d/d9/Flag_of_Mengtai.png/300px-Flag_of_Mengtai.png" },
+    { name: "Udyanapura", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/5/56/Flag_of_Udyanapura.png/300px-Flag_of_Udyanapura.png" },
+    { name: "Zhongjing", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/b/ba/Flag_of_Zhongjing.png/300px-Flag_of_Zhongjing.png" },
+    { name: "Tselinoyarsk", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/5/56/Flag_of_Tselinoyarsk.png/300px-Flag_of_Tselinoyarsk.png" },
+    { name: "Eisenhardt", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/4/40/Flag_of_Eisenhardt.png/300px-Flag_of_Eisenhardt.png" },
+    { name: "Aska", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/8d/Flag_of_Aska.png/300px-Flag_of_Aska.png" },
+    { name: "Enoksen", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/4/43/Flag_of_Enoksen.png/300px-Flag_of_Enoksen.png" },
+    { name: "Ishenhorsk", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/4/4b/Flag_of_Ishenhorsk.png/300px-Flag_of_Ishenhorsk.png" },
+    { name: "Novacadia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/a/a0/Flag_of_Novacadia.png/300px-Flag_of_Novacadia.png" },
+    { name: "Allennia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/3/3d/Flag_of_Allennia.png/300px-Flag_of_Allennia.png" },
+    { name: "Alpinora", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/a/aa/Flag_of_Alpinora.png/300px-Flag_of_Alpinora.png" },
+    { name: "Arleau", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/6/6e/Flag_of_Arleau.png/300px-Flag_of_Arleau.png" },
+    { name: "Chereine", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/a/a9/Flag_of_Chereine.png/300px-Flag_of_Chereine.png" },
+    { name: "Costania", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/9/94/Flag_of_Costania.png/300px-Flag_of_Costania.png" },
+    { name: "Hellamos", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/7/7c/Flag_of_Hellamos.png/300px-Flag_of_Hellamos.png" },
+    { name: "Himmelsberg", flag: "https://aeronautica.wikioasis.org/wiki/Special:Redirect/file/Flag_of_Himmelsberg.png" },
+    { name: "Anhedral", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/6/6a/Flag_of_Anhedral.png/300px-Flag_of_Anhedral.png" },
+    { name: "Smaragaidia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/f/fb/Flag_of_Smaragaidia.png/300px-Flag_of_Smaragaidia.png" },
+    { name: "Lalland", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/6/67/Flag_of_Lalland.png/300px-Flag_of_Lalland.png" },
+    { name: "Portona", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/4/4f/Flag_of_Portona.png/300px-Flag_of_Portona.png" },
+    { name: "Rawaki", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/7/76/Flag_of_Rawaki.png/300px-Flag_of_Rawaki.png" },
+    { name: "Saalhofen", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/2/28/Flag_of_Saalhofen.png/300px-Flag_of_Saalhofen.png" },
+    { name: "Schalperland", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/d/d1/Flag_of_Schalperland.png/300px-Flag_of_Schalperland.png" },
+    { name: "Walowia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/87/Flag_of_Walowia.png/300px-Flag_of_Walowia.png" },
+    { name: "Alavega", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/1/15/Flag_of_Alavega.png/300px-Flag_of_Alavega.png" },
+    { name: "None / Crafted", flag: "" }
 ];
 
-function getDailyIndex() {
-  const start = new Date(2024,0,1);
-  const now = new Date();
-  return Math.floor((now - start)/(1000*60*60*24)) % DATA.length;
-}
+        const DATA = [
+            { name: "General Dynamics F-16 Fighting Falcon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true", soldAt: "Eisenhardt", price: "21000" },
+            { name: "Airbus A300-600ST Beluga", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true", soldAt: "Arleau", price: "74000" },
+            { name: "Lockheed C-130H Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true", soldAt: "United Isles of Oconia", price: "11600" },
+            { name: "Hughes H-4 Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true", soldAt: "None / Crafted", price: "" },
+            { name: "Boeing 747-400LCF Dreamlifter", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20182707.png?raw=true", soldAt: "None / Crafted", price: "" },
+            { name: "Antonov A-40", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20195524.png?raw=true", soldAt: "None / Crafted", price: "" },
+        ];
 
-let current = DATA[getDailyIndex()];
+        const today = new Date().toDateString();
+        let isUnlimited = false;
+        let currentAircraft;
+        let guesses = [], gameOver = false, bonusMode = false, tiles = [], hidden = [];
 
-// ================= STORAGE =================
-const today = new Date().toDateString();
-let playedToday = localStorage.getItem("aero_played_day");
-let streak = parseInt(localStorage.getItem("aero_streak") || "0");
+        function initDaily() {
+            if (localStorage.getItem("aero_last_date") !== today) {
+                localStorage.removeItem("aero_guesses_main");
+                localStorage.removeItem("aero_guesses_loc");
+                localStorage.removeItem("aero_played_day");
+                localStorage.removeItem("aero_loc_done");
+                localStorage.removeItem("aero_price_done");
+                localStorage.setItem("aero_last_date", today);
+            }
+            currentAircraft = DATA[Math.floor((new Date() - new Date(2024, 0, 1)) / 86400000) % DATA.length];
+            document.getElementById("streakBox").textContent = "🔥 Streak: " + (localStorage.getItem("aero_streak") || "0");
+            document.getElementById("streakBox").style.display = "block";
+            document.getElementById("timer").style.display = "block";
+            switchView('main');
+        }
 
-let locked = playedToday === today;
+        function toggleMode() {
+            isUnlimited = !isUnlimited;
+            const btn = document.getElementById("modeToggle");
+            btn.textContent = isUnlimited ? "Daily Mode" : "Unlimited Mode";
+            
+            document.getElementById("navBar").style.display = "none";
+            document.getElementById("playAgainBtn").style.display = "none";
+            document.getElementById("answerReveal").style.display = "none";
+            document.getElementById("grid").innerHTML = "";
+            document.getElementById("tileWrapper").style.display = "block"; // FIX: Ensure wrapper is visible
 
-// ================= STATE =================
-let guesses = [];
-let gameOver = false;
+            if (isUnlimited) {
+                document.getElementById("streakBox").style.display = "none";
+                document.getElementById("timer").style.display = "none";
+                resetUnlimited();
+            } else {
+                initDaily();
+            }
+        }
 
-let selectedIndex = -1;
-let enterOnce = false;
+        function resetUnlimited() {
+            let next;
+            do { next = DATA[Math.floor(Math.random() * DATA.length)]; } while (next === currentAircraft && DATA.length > 1);
+            currentAircraft = next;
+            gameOver = false; bonusMode = false; guesses = [];
+            document.getElementById("gameTitle").textContent = "AeroCraftle (Unlimited)";
+            document.getElementById("grid").innerHTML = "";
+            document.getElementById("answerReveal").style.display = "none";
+            document.getElementById("playAgainBtn").style.display = "none";
+            document.getElementById("inputRow").style.display = "flex";
+            const input = document.getElementById("input");
+            input.disabled = false; input.value = ""; input.placeholder = "Type aircraft name...";
+            createTiles();
+        }
 
-// ================= ELEMENTS =================
-const input = document.getElementById("input");
-const dropdown = document.getElementById("dropdown");
-const grid = document.getElementById("grid");
+        function switchView(mode) {
+            document.getElementById("playAgainBtn").style.display = "none";
+            if (isUnlimited) return; 
 
-// ================= TILE SYSTEM =================
-let tiles = [];
-let hidden = [];
+            const playedToday = localStorage.getItem("aero_played_day") === today;
+            const locDoneToday = localStorage.getItem("aero_loc_done") === today;
+            const priceDoneToday = localStorage.getItem("aero_price_done") === today;
+            const hasPrice = currentAircraft.price && currentAircraft.price !== "";
 
-function createTiles() {
-  const img = document.getElementById("baseImage");
-  img.src = current.image;
+            const grid = document.getElementById("grid");
+            const ans = document.getElementById("answerReveal");
+            const bonusBtn = document.getElementById("bonusBtn");
+            const priceBtn = document.getElementById("priceBonusBtn");
+            const input = document.getElementById("input");
+            const wrapper = document.getElementById("tileWrapper");
 
-  const grid = document.getElementById("tileGrid");
-  grid.innerHTML = "";
+            grid.innerHTML = "";
+            ans.style.display = "none";
+            bonusBtn.style.display = "none";
+            priceBtn.style.display = "none";
+            wrapper.style.display = "block";
 
-  tiles = [];
-  hidden = [];
+            if (mode === 'main') {
+                bonusMode = false;
+                document.getElementById("gameTitle").textContent = "AeroCraftle";
+                rebuildGrid('main'); 
+                if (playedToday) {
+                    showNotification("★ Answer: " + currentAircraft.name);
+                    fullReveal();
+                    document.getElementById("inputRow").style.display = "none";
+                    if (!locDoneToday) bonusBtn.style.display = "block";
+                } else {
+                    document.getElementById("inputRow").style.display = "flex";
+                    input.disabled = false;
+                    input.placeholder = "Type aircraft name...";
+                    gameOver = false;
+                }
+            } else if (mode === 'loc') {
+                bonusMode = true;
+                document.getElementById("gameTitle").textContent = "Bonus: Where is it sold?";
+                rebuildGrid('loc');
+                if (locDoneToday) {
+                    showNotification("★ Answer: " + currentAircraft.soldAt);
+                    fullReveal();
+                    document.getElementById("inputRow").style.display = "none";
+                    if (!priceDoneToday && hasPrice) priceBtn.style.display = "block";
+                } else {
+                    document.getElementById("inputRow").style.display = "flex";
+                    input.disabled = false;
+                    input.placeholder = "Search country...";
+                    gameOver = false;
+                }
+            } else if (mode === 'price') {
+                document.getElementById("gameTitle").textContent = "Bonus 2: Guess the Price";
+                wrapper.style.display = "none";
+                document.getElementById("inputRow").style.display = "none";
+                startPriceRound();
+            }
+            
+            document.querySelectorAll('.nav-btn')[2].style.display = hasPrice ? "block" : "none";
+            if (priceDoneToday || (locDoneToday && !hasPrice)) document.getElementById("navBar").style.display = "flex";
 
-  for (let i=0;i<6;i++) {
-    const t = document.createElement("div");
-    t.className="tile";
-    tiles.push(t);
-    hidden.push(i);
-    grid.appendChild(t);
-  }
-}
+            document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+                const views = ['main', 'loc', 'price'];
+                btn.classList.toggle('active', views[idx] === mode);
+            });
+        }
 
-function revealTile() {
-  if (!hidden.length) return;
-  const r = Math.floor(Math.random()*hidden.length);
-  const i = hidden.splice(r,1)[0];
-  tiles[i].classList.add("revealed");
-}
+        function rebuildGrid(mode) {
+            const storageKey = mode === 'main' ? "aero_guesses_main" : "aero_guesses_loc";
+            const history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            const grid = document.getElementById("grid");
+            grid.innerHTML = "";
+            
+            createTiles(mode === 'loc'); 
+            
+            history.forEach((guess, index) => {
+                const isCorrect = mode === 'main' 
+                    ? guess.toLowerCase() === currentAircraft.name.toLowerCase() 
+                    : guess.toLowerCase() === currentAircraft.soldAt.toLowerCase();
+                const row = document.createElement("div");
+                row.className = "row " + (isCorrect ? "correct" : "");
+                row.innerHTML = `<div>${guess}</div><div>${isCorrect ? "✔" : "✖"}</div><div>${index + 1}/6</div>`;
+                grid.appendChild(row);
+                
+                if (!isCorrect) revealTile();
+                else fullReveal();
+            });
+            if (mode === 'main') guesses = history;
+        }
 
-// ================= TIMER =================
-function updateTimer() {
-  const now = new Date();
+        function submitGuess() {
+            const input = document.getElementById("input");
+            const val = input.value.trim();
+            if (!val || gameOver) return;
+            
+            if (!isUnlimited) {
+                const storageKey = !bonusMode ? "aero_guesses_main" : "aero_guesses_loc";
+                const currentHistory = JSON.parse(localStorage.getItem(storageKey) || "[]");
+                currentHistory.push(val);
+                localStorage.setItem(storageKey, JSON.stringify(currentHistory));
+                guesses = currentHistory;
+            } else { guesses.push(val); }
+            
+            const isCorrect = !bonusMode ? val.toLowerCase() === currentAircraft.name.toLowerCase() : val.toLowerCase() === currentAircraft.soldAt.toLowerCase();
+            const row = document.createElement("div");
+            row.className = "row " + (isCorrect ? "correct" : "");
+            row.innerHTML = `<div>${val}</div><div>${isCorrect ? "✔" : "✖"}</div><div>${guesses.length}/6</div>`;
+            document.getElementById("grid").appendChild(row);
 
-  const next = new Date();
-  next.setHours(24, 0, 0, 0);
+            if (isCorrect || guesses.length >= 6) {
+                gameOver = true;
+                if (isCorrect) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                showNotification("★ Answer: " + (!bonusMode ? currentAircraft.name : currentAircraft.soldAt));
+                fullReveal();
+                
+                if (isUnlimited) {
+                    document.getElementById("playAgainBtn").style.display = "block";
+                } else {
+                    if (!bonusMode) {
+                        localStorage.setItem("aero_played_day", today);
+                        let s = parseInt(localStorage.getItem("aero_streak") || "0");
+                        if (isCorrect) s++; else s = 0;
+                        localStorage.setItem("aero_streak", s);
+                        document.getElementById("streakBox").textContent = "🔥 Streak: " + s;
+                        document.getElementById("bonusBtn").style.display = "block";
+                    } else {
+                        localStorage.setItem("aero_loc_done", today);
+                        const hasPrice = currentAircraft.price && currentAircraft.price !== "";
+                        if (hasPrice) document.getElementById("priceBonusBtn").style.display = "block";
+                        else document.getElementById("navBar").style.display = "flex";
+                    }
+                }
+                input.disabled = true;
+                document.getElementById("inputRow").style.display = "none";
+            } else {
+                revealTile();
+            }
+            input.value = ""; document.getElementById("dropdown").innerHTML = "";
+        }
 
-  let diff = next - now;
+        function createTiles(showFlag = false) {
+            const img = document.getElementById("baseImage");
+            if (showFlag) {
+                const nation = COUNTRIES.find(c => c.name === currentAircraft.soldAt);
+                img.src = (nation && nation.flag) ? nation.flag : currentAircraft.image;
+            } else {
+                img.src = currentAircraft.image;
+            }
+            const tg = document.getElementById("tileGrid");
+            tg.innerHTML = ""; tiles = []; hidden = [];
+            for (let i = 0; i < 6; i++) {
+                const t = document.createElement("div"); t.className = "tile";
+                tiles.push(t); hidden.push(i); tg.appendChild(t);
+            }
+        }
 
-  // 🛑 HARD CLAMP: never allow negative values
-  if (diff <= 0) {
-    diff = 0;
-    location.reload(); // safe reset
-    return;
-  }
+        function fullReveal() { document.getElementById("tileGrid").innerHTML = ""; }
 
-  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        function revealTile() {
+            if (hidden.length) tiles[hidden.splice(Math.floor(Math.random() * hidden.length), 1)[0]].classList.add("revealed");
+        }
 
-  document.getElementById("timer").textContent =
-    "Next aircraft in: " + h + ":" + m + ":" + s;
-}
-setInterval(updateTimer,1000);
+        function startPriceRound() {
+            const price = parseInt(currentAircraft.price);
+            const step = price > 50000 ? 10000 : (price > 10000 ? 5000 : 1000);
+            let start = Math.max(0, (price - (2 * step)) - ((price - (2 * step)) % 500));
+            const container = document.createElement("div");
+            container.className = "price-container";
+            for(let i = 0; i < 4; i++) {
+                let min = start + (i * step), max = min + step - 1;
+                const correct = (price >= min && price <= max);
+                const btn = document.createElement("button");
+                btn.className = "price-btn"; 
+                btn.textContent = `${min.toLocaleString()} - ${max.toLocaleString()}`;
+                if (localStorage.getItem("aero_price_done") === today && correct) btn.style.background = "#538d4e";
+                btn.onclick = () => {
+                    localStorage.setItem("aero_price_done", today);
+                    if(correct) confetti();
+                    btn.style.background = correct ? "#538d4e" : "#b00020";
+                    showNotification("★ Price: " + price.toLocaleString());
+                    document.querySelectorAll(".price-btn").forEach(b => b.disabled = true);
+                    document.getElementById("navBar").style.display = "flex";
+                };
+                if (localStorage.getItem("aero_price_done") === today) btn.disabled = true;
+                container.appendChild(btn);
+            }
+            document.getElementById("grid").appendChild(container);
+            if (localStorage.getItem("aero_price_done") === today) showNotification("★ Price: " + price.toLocaleString());
+        }
 
-// ================= STREAK =================
-function updateStreakDisplay() {
-  document.getElementById("streakBox").textContent =
-    "🔥 Streak: " + streak;
-}
+        function showNotification(text) {
+            const box = document.getElementById("answerReveal");
+            box.style.display = "block"; box.textContent = text;
+        }
 
-function finishGame(win) {
-  if (playedToday === today) return;
+        function showDropdown() {
+            const drp = document.getElementById("dropdown"); drp.innerHTML = "";
+            const val = document.getElementById("input").value.toLowerCase();
+            const list = bonusMode ? COUNTRIES.map(c => c.name) : DATA.map(d => d.name);
+            list.filter(n => n.toLowerCase().includes(val)).sort().forEach(name => {
+                const itm = document.createElement("div"); itm.className = "option"; itm.textContent = name;
+                itm.onclick = () => { document.getElementById("input").value = name; drp.innerHTML = ""; };
+                drp.appendChild(itm);
+            });
+        }
 
-  localStorage.setItem("aero_played_day", today);
+        function updateTimer() {
+            const now = new Date(), next = new Date();
+            next.setHours(24, 0, 0, 0);
+            const diff = next - now;
+            const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+            document.getElementById("timer").textContent = `Next aircraft in: ${h}:${m}:${s}`;
+        }
 
-  if (win) streak++;
-  else streak = 0;
+        const inputField = document.getElementById("input");
+        inputField.addEventListener("keydown", (e) => {
+            const drp = document.getElementById("dropdown");
+            if (e.key === "Enter") {
+                if (drp.innerHTML !== "" && drp.querySelector(".option")) {
+                    inputField.value = drp.querySelector(".option").textContent;
+                    drp.innerHTML = ""; 
+                } else { submitGuess(); }
+            }
+        });
+        inputField.addEventListener("focus", showDropdown);
+        inputField.addEventListener("input", showDropdown);
+        document.getElementById("guessBtn").onclick = submitGuess;
+        document.getElementById("bonusBtn").onclick = () => switchView('loc');
+        document.getElementById("priceBonusBtn").onclick = () => switchView('price');
 
-  localStorage.setItem("aero_streak", streak);
-
-  updateStreakDisplay();
-  locked = true;
-}
-
-// ================= ANSWER BOX =================
-function showAnswer() {
-  const box = document.getElementById("answerReveal");
-  box.style.display = "block";
-  box.textContent = "★ Correct Answer: " + current.name;
-}
-
-// ================= GUESS =================
-function submitGuess() {
-  if (locked || gameOver) return;
-
-  const val = input.value.trim();
-  if (!val) return;
-
-  const correct = val.toLowerCase() === current.name.toLowerCase();
-
-  guesses.push(val);
-
-  const row = document.createElement("div");
-  row.className = "row";
-
-  row.innerHTML = `
-    <div>${val}</div>
-    <div>${correct ? "✔" : "✖"}</div>
-    <div>${guesses.length}/6</div>
-  `;
-
-  if (correct) {
-    row.classList.add("correct");
-    gameOver = true;
-    tiles.forEach(t=>t.classList.add("revealed"));
-    finishGame(true);
-  } else {
-    revealTile();
-  }
-
-  grid.appendChild(row);
-
-  if (guesses.length >= 6 && !correct) {
-    gameOver = true;
-    tiles.forEach(t=>t.classList.add("revealed"));
-    showAnswer();
-    finishGame(false);
-  }
-
-  input.value = "";
-  dropdown.innerHTML = "";
-  enterOnce = false;
-}
-
-// ================= DROPDOWN =================
-function showDropdown() {
-  dropdown.innerHTML = "";
-  selectedIndex = -1;
-  enterOnce = false;
-
-  const val = input.value.toLowerCase();
-
-  DATA.map(d=>d.name)
-    .sort((a,b)=>a.localeCompare(b))
-    .filter(n=>n.toLowerCase().includes(val))
-    .forEach(n=>{
-      const d = document.createElement("div");
-      d.className="option";
-      d.textContent=n;
-
-      d.onclick=()=>{
-        input.value=n;
-        dropdown.innerHTML="";
-      };
-
-      dropdown.appendChild(d);
-    });
-}
-
-// ================= KEYBOARD =================
-input.addEventListener("keydown", e=>{
-
-  const opts = [...dropdown.querySelectorAll(".option")];
-
-  if (e.key==="ArrowDown") {
-    e.preventDefault();
-    selectedIndex = (selectedIndex+1)%opts.length;
-    update(opts);
-  }
-
-  if (e.key==="ArrowUp") {
-    e.preventDefault();
-    selectedIndex = (selectedIndex-1+opts.length)%opts.length;
-    update(opts);
-  }
-
-  if (e.key==="Enter") {
-    e.preventDefault();
-
-    if (selectedIndex>=0 && opts[selectedIndex]) {
-      input.value = opts[selectedIndex].textContent;
-      dropdown.innerHTML="";
-      return;
-    }
-
-    if (opts.length) {
-      if (!enterOnce) {
-        input.value = opts[0].textContent;
-        enterOnce = true;
-        return;
-      }
-    }
-
-    submitGuess();
-  }
-});
-
-function update(opts){
-  opts.forEach(o=>o.classList.remove("selected"));
-  if (opts[selectedIndex]) {
-    opts[selectedIndex].classList.add("selected");
-  }
-}
-
-// ================= INIT =================
-createTiles();
-updateStreakDisplay();
-updateTimer();
-
-document.getElementById("guessBtn").onclick = submitGuess;
-input.addEventListener("input", showDropdown);
-input.addEventListener("focus", showDropdown);
-
-// lock UI if already played
-if (locked) {
-
-  // disable gameplay
-  input.disabled = true;
-  document.getElementById("guessBtn").disabled = true;
-
-  // reveal full aircraft image
-  const img = document.getElementById("baseImage");
-  img.src = current.image;
-
-  // remove all tiles (no hiding)
-  document.getElementById("tileGrid").innerHTML = "";
-
-  // show message
-  const box = document.getElementById("answerReveal");
-  box.style.display = "block";
-  box.textContent = "★ Already played today. Come back tomorrow. Answer: " + current.name;
-}
-
-</script>
+        initDaily();
+        setInterval(updateTimer, 1000);
+    </script>
 </body>
-</html>
-    
-  </body>
-  
 </html>
