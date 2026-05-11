@@ -55,7 +55,7 @@
 
         <div id="navBar">
             <button class="nav-btn" id="nav-main" onclick="switchView('main')">Round 1</button>
-            <button class="nav-btn" id="nav-loc" onclick="switchView('loc')">Bonus 1</button>
+            <button class="nav-btn" id="nav-loc" onclick="openBonus1()">Bonus 1</button>
             <button class="nav-btn" id="nav-price" onclick="switchView('price')">Bonus 2</button>
             <button class="nav-btn" id="nav-rarity" onclick="switchView('rarity')">Bonus 3</button>
         </div>
@@ -85,7 +85,7 @@
     </div>
 
     <script>
-        const COUNTRIES = [
+        const COUNTRY_DATA = [
             { name: "Eiko", flag: "https://aeronautica.wikioasis.org/wiki/Special:Redirect/file/Flag_of_Eiko.png" },
             { name: "Fiskar", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/1/1d/Flag_of_Fiskar.png/300px-Flag_of_Fiskar.png" },
             { name: "United Isles of Oconia", flag: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/84/Flag_of_the_United_Isles_of_Oconia.png/1920px-Flag_of_the_United_Isles_of_Oconia.png" },
@@ -226,6 +226,12 @@
 
         function showPlayAgainIfUnlimitedComplete() {
             document.getElementById("playAgainBtn").style.display = (isUnlimited && isRarityDone()) ? "block" : "none";
+        }
+
+        function openBonus1() {
+            if (!isMainDone()) return;
+            gameOver = false;
+            switchView("loc");
         }
 
         function switchView(mode) {
@@ -552,7 +558,7 @@
             }
         });
         document.getElementById("guessBtn").onclick = submitGuess;
-        document.getElementById("bonusBtn").onclick = () => switchView("loc");
+        document.getElementById("bonusBtn").onclick = openBonus1;
         document.getElementById("priceBonusBtn").onclick = () => switchView("price");
         document.getElementById("rarityBonusBtn").onclick = () => switchView("rarity");
 
