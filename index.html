@@ -476,7 +476,7 @@
             if (showExtra) {
                 if (currentMode === "dev" && currentAircraft.devType === "Badge") img.src = currentAircraft.badgeIcon;
                 else { const c = COUNTRY_DATA.find(c => c.name === currentAircraft.soldAt); img.src = (c && c.flag) ? c.flag : "https://github.com/WormDude/AeroCraftle/blob/main/Screenshot%202026-05-03%20151543.png?raw=true"; }
-            } else img.src = (currentMode === "dev" && currentAircraft.devType === "Badge" && currentAircraft.badgeIcon) ? currentAircraft.badgeIcon : currentAircraft.image;
+            } else img.src = currentAircraft.image;
             const tg = document.getElementById("tileGrid");
             tg.innerHTML = "";
             for (let i = 0; i < 6; i++) { const t = document.createElement("div"); t.className = "tile"; tg.appendChild(t); }
