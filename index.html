@@ -58,6 +58,7 @@
             <button class="nav-btn" id="nav-loc" onclick="openBonus1()">Bonus 1</button>
             <button class="nav-btn" id="nav-price" onclick="switchView('price')">Bonus 2</button>
             <button class="nav-btn" id="nav-rarity" onclick="switchView('rarity')">Bonus 3</button>
+            <button class="nav-btn" id="nav-desc" onclick="switchView('desc')">Bonus 4</button>
         </div>
 
         <div id="timer">Loading...</div>
@@ -77,6 +78,7 @@
         <button id="bonusBtn" class="big-btn">PLAY BONUS ROUND</button>
         <button id="priceBonusBtn" class="big-btn">PLAY 2ND BONUS ROUND</button>
         <button id="rarityBonusBtn" class="big-btn">PLAY 3RD BONUS ROUND</button>
+        <button id="descBonusBtn" class="big-btn">PLAY 4TH BONUS ROUND</button>
         <button id="nextBonusBtn" class="big-btn">PLAY NEXT BONUS ROUND</button>
         <button id="playAgainBtn" class="big-btn" onclick="resetUnlimited()">PLAY AGAIN</button>
 
@@ -121,26 +123,28 @@
         ];
 
         const RARITIES = { "Widespread": "#FFFFFF", "Common": "#32CD32", "Uncommon": "#F0E68C", "Rare": "#9370DB", "Ultra Rare": "#0000FF", "Epic": "#FF8C00", "Mythical": "#00FFFF", "Legendary": "#FF0000" };
+        const NO_SOLD_AT = "None / Crafted";
+        const DESCRIPTION_BUTTON_COUNT = 6;
 
         const DATA = [
-            { name: "General Dynamics F-16 Fighting Falcon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true", soldAt: "Eisenhardt", price: "21000", rarity: "Uncommon", mode: "standard" },
-            { name: "Airbus A300-600ST Beluga", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true", soldAt: "Arleau", price: "74000", rarity: "Rare", mode: "standard" },
-            { name: "Hughes H-4 Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Epic", mode: "standard" },
-            { name: "Lockheed C-130H Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true", soldAt: "United Isles of Oconia", price: "11600", rarity: "Common", mode: "standard" },
-            { name: "Airbus A320-200", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20170554.png?raw=true", soldAt: "Anhedral", price: "19800", rarity: "Widespread", mode: "standard" },
-            { name: "High Altitude Surveillance Balloon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20062714.png?raw=true", soldAt: "Zhongjing", price: "5000", rarity: "Rare", mode: "standard" },
+            { name: "General Dynamics F-16 Fighting Falcon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true", soldAt: "Eisenhardt", price: "21000", rarity: "Uncommon", description: "Multirole Fighter", mode: "standard" },
+            { name: "Airbus A300-600ST Beluga", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true", soldAt: "Arleau", price: "74000", rarity: "Rare", description: "Oversize Transport", mode: "standard" },
+            { name: "Hughes H-4 Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Flying Boat", mode: "standard" },
+            { name: "Lockheed C-130H Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true", soldAt: "United Isles of Oconia", price: "11600", rarity: "Common", description: "Military Transport", mode: "standard" },
+            { name: "Airbus A320-200", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20170554.png?raw=true", soldAt: "Anhedral", price: "19800", rarity: "Widespread", description: "Narrow-Body Airliner", mode: "standard" },
+            { name: "High Altitude Surveillance Balloon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20062714.png?raw=true", soldAt: "Zhongjing", price: "5000", rarity: "Rare", description: "Totally a Weather Balloon", mode: "standard" },
             { name: "The Skeld", image: "https://cdn.wikioasis.org/aeronauticawiki/4/4d/Skeld-2.png", devType: "Dev", aircraftType: "Single Engine", mode: "dev" },
             { name: "Death Star", image: "https://cdn.wikioasis.org/aeronauticawiki/a/af/DEATHSTAR.png", devType: "Unobtainable", aircraftType: "Airship", mode: "dev" },
             { name: "Katan X-50 Ranger", image: "https://cdn.wikioasis.org/aeronauticawiki/b/ba/Katan-1.png", devType: "Event", eventTier: "Tier III", aircraftType: "Airship", mode: "dev" },
             { name: "Neucom Incorporated R-505U", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202025-12-31%20102619.png?raw=true", devType: "Event", eventTier: "Tier III", aircraftType: "Supersonic Transport", mode: "dev" },
             { name: "Dornier Seastar", image: "https://raw.githubusercontent.com/WormDude/aeroportle-images/refs/heads/main/Screenshot%202026-03-07%20062208.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/f/fd/1st_Anniversary_badge.png", badgeName: "1 Year Anniversary", devType: "Badge", aircraftType: "Multi Engine", mode: "dev" },
             { name: "Astraeus ADF-340X Relay", image: "https://cdn.wikioasis.org/aeronauticawiki/d/dc/Astraeus_ADF-340X_Relay_1.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/d/d7/Valentines_2024_badge.png", badgeName: "Valentines 2024", devType: "Badge", aircraftType: "Jet Engine", mode: "dev" },
-            { name: "Boeing 929 Jetfoil", image: "https://cdn.wikioasis.org/aeronauticawiki/9/97/Boeing_929_Jetfoil_0.png", soldAt: "Zhongjing", price: "54900", rarity: "Uncommon", mode: "boats" },
-            { name: "Leo-class Cruise Ship", image: "https://cdn.wikioasis.org/aeronauticawiki/0/08/Leo-class_Cruise_Ship_0.png", soldAt: "Saalhofen", price: "483000", rarity: "Uncommon", mode: "boats" },
-            { name: "Ulyanovsk-class Aircraft Carrier", image: "https://cdn.wikioasis.org/aeronauticawiki/8/80/Ulyanovsk-class_Aircraft_Carrier.png", soldAt: "Tselinoyarsk", price: "815000", rarity: "Epic", mode: "boats" },
-            { name: "Zumwalt-class Destroyer", image: "https://cdn.wikioasis.org/aeronauticawiki/b/bf/Zumwalt-class_Destroyer_0.png", soldAt: "United Isles of Oconia", price: "283000", rarity: "Ultra Rare", mode: "boats" },
-            { name: "Food Boat", image: "https://cdn.wikioasis.org/aeronauticawiki/6/61/Food_Boat_0.png", soldAt: "United Isles of Oconia", price: "500", rarity: "Common", mode: "boats" },
-            { name: "Azzam-class Superyacht", image: "https://cdn.wikioasis.org/aeronauticawiki/d/d2/Azzam-class_Superyacht_5.png", soldAt: "United Isles of Oconia", price: "672000", rarity: "Epic", mode: "boats" }
+            { name: "Boeing 929 Jetfoil", image: "https://cdn.wikioasis.org/aeronauticawiki/9/97/Boeing_929_Jetfoil_0.png", soldAt: "Zhongjing", price: "54900", rarity: "Uncommon", description: "Passenger Hydrofoil", mode: "boats" },
+            { name: "Leo-class Cruise Ship", image: "https://cdn.wikioasis.org/aeronauticawiki/0/08/Leo-class_Cruise_Ship_0.png", soldAt: "Saalhofen", price: "483000", rarity: "Uncommon", description: "Cruise Ship", mode: "boats" },
+            { name: "Ulyanovsk-class Aircraft Carrier", image: "https://cdn.wikioasis.org/aeronauticawiki/8/80/Ulyanovsk-class_Aircraft_Carrier.png", soldAt: "Tselinoyarsk", price: "815000", rarity: "Epic", description: "Nuclear-Powered Supercarrier", mode: "boats" },
+            { name: "Zumwalt-class Destroyer", image: "https://cdn.wikioasis.org/aeronauticawiki/b/bf/Zumwalt-class_Destroyer_0.png", soldAt: "United Isles of Oconia", price: "283000", rarity: "Ultra Rare", description: "Guided-missile Destroyer", mode: "boats" },
+            { name: "Food Boat", image: "https://cdn.wikioasis.org/aeronauticawiki/6/61/Food_Boat_0.png", soldAt: "United Isles of Oconia", price: "500", rarity: "Common", description: "Pontoon Boat", mode: "boats" },
+            { name: "Azzam-class Superyacht", image: "https://cdn.wikioasis.org/aeronauticawiki/d/d2/Azzam-class_Superyacht_5.png", soldAt: "United Isles of Oconia", price: "672000", rarity: "Epic", description: "Superyacht", mode: "boats" }
         ];
 
         const MAN_BADGES = ["1 Year Anniversary", "Halloween 2022", "Valentines 2023", "April Fools 2023", "2nd Year Anniversary!", "VE Day 2023", "100k Favorites!", "Halloween 2023", "10 Million Visits!", "New Years 2024", "Valentines 2024", "3rd Year Anniversary!", "Halloween 2024", "20 Million Visits!", "Proficient Pilot", "Captain", "Circumnavigation", "Space Commander", "Supersonic Transport Mastery"];
@@ -148,8 +152,8 @@
 
         let today, currentAircraft, gameOver = false, bonusMode = false, priceRanges = [], isUnlimited = false;
         let currentMode = "standard";
-        let u_played = false, u_loc = false, u_price = false, u_rarity = false;
-        let u_history_main = [], u_history_loc = [], u_loc_guess = "", u_price_guess = "", u_rarity_guess = "";
+        let u_played = false, u_loc = false, u_price = false, u_rarity = false, u_desc = false;
+        let u_history_main = [], u_history_loc = [], u_loc_guess = "", u_price_guess = "", u_rarity_guess = "", u_desc_guesses = [], u_desc_options = [];
         let u_recent_answers_by_mode = { standard: [], dev: [], boats: [] }, hiddenPoolMain = [], hiddenPoolLoc = [];
 
         function streakKey(mode) { return "aero_streak_" + mode; }
@@ -193,8 +197,8 @@
                 currentAircraft = newAircraft;
                 recent.push(currentAircraft.name);
                 if (recent.length > 5) recent.shift();
-                u_played = false; u_loc = false; u_price = false; u_rarity = false;
-                u_history_main = []; u_history_loc = []; u_loc_guess = ""; u_price_guess = ""; u_rarity_guess = "";
+                u_played = false; u_loc = false; u_price = false; u_rarity = false; u_desc = false;
+                u_history_main = []; u_history_loc = []; u_loc_guess = ""; u_price_guess = ""; u_rarity_guess = ""; u_desc_guesses = []; u_desc_options = [];
                 resetTilePools();
                 generateDailyPriceRanges();
             }
@@ -220,12 +224,16 @@
         }
 
         function isMainDone() { return isUnlimited ? u_played : (localStorage.getItem("aero_played_day_" + currentMode) === today); }
-        function isLocDone() { return isUnlimited ? u_loc : (localStorage.getItem("aero_loc_done_" + currentMode) === today); }
+        function skipsSoldAtBonus() { return currentAircraft && currentAircraft.soldAt === NO_SOLD_AT; }
+        function isLocDone() { return skipsSoldAtBonus() || (isUnlimited ? u_loc : (localStorage.getItem("aero_loc_done_" + currentMode) === today)); }
         function isPriceDone() { return isUnlimited ? u_price : (localStorage.getItem("aero_price_done_" + currentMode) === today); }
         function isRarityDone() { return isUnlimited ? u_rarity : (localStorage.getItem("aero_rarity_done_" + currentMode) === today); }
+        function hasDescriptionBonus() { return currentMode !== "dev" && Boolean(currentAircraft && currentAircraft.description); }
+        function isDescriptionDone() { return !hasDescriptionBonus() || (isUnlimited ? u_desc : (localStorage.getItem("aero_desc_done_" + currentMode) === today)); }
 
         function showPlayAgainIfUnlimitedComplete() {
-            document.getElementById("playAgainBtn").style.display = (isUnlimited && isRarityDone()) ? "block" : "none";
+            const finalDone = hasDescriptionBonus() ? isDescriptionDone() : isRarityDone();
+            document.getElementById("playAgainBtn").style.display = (isUnlimited && finalDone) ? "block" : "none";
         }
 
         function openBonus1() {
@@ -238,13 +246,14 @@
             document.getElementById("grid").innerHTML = "";
             document.getElementById("dropdown").innerHTML = "";
             document.getElementById("inputRow").style.display = "none";
-            ["bonusBtn", "priceBonusBtn", "rarityBonusBtn", "nextBonusBtn", "playAgainBtn"].forEach(id => document.getElementById(id).style.display = "none");
+            ["bonusBtn", "priceBonusBtn", "rarityBonusBtn", "descBonusBtn", "nextBonusBtn", "playAgainBtn"].forEach(id => document.getElementById(id).style.display = "none");
 
-            const playedMain = isMainDone(), locDone = isLocDone(), priceDone = isPriceDone(), rarityDone = isRarityDone();
+            const playedMain = isMainDone(), locDone = isLocDone(), priceDone = isPriceDone(), rarityDone = isRarityDone(), descDone = isDescriptionDone(), descAvailable = hasDescriptionBonus(), skipLoc = skipsSoldAtBonus();
             document.getElementById("navBar").style.display = playedMain ? "flex" : "none";
             document.getElementById("nav-loc").disabled = !playedMain;
-            document.getElementById("nav-price").disabled = !locDone;
-            document.getElementById("nav-rarity").disabled = !priceDone;
+            document.getElementById("nav-price").disabled = !playedMain || !locDone;
+            document.getElementById("nav-rarity").disabled = !playedMain || !priceDone;
+            document.getElementById("nav-desc").disabled = !playedMain || !rarityDone || !descAvailable;
 
             const grid = document.getElementById("grid"), ans = document.getElementById("answerReveal"), wrapper = document.getElementById("tileWrapper"), inputRow = document.getElementById("inputRow");
             ans.style.display = "none";
@@ -256,27 +265,34 @@
                 rebuildGrid("main");
                 if (playedMain) { showNotification("★ Answer: " + currentAircraft.name); fullReveal(); }
                 else { inputRow.style.display = "flex"; gameOver = false; }
-                if (playedMain && !locDone) document.getElementById("bonusBtn").style.display = "block";
-                if (locDone && !priceDone) document.getElementById("priceBonusBtn").style.display = "block";
-                if (priceDone && !rarityDone) document.getElementById("rarityBonusBtn").style.display = "block";
+                if (playedMain && (!locDone || skipLoc)) document.getElementById("bonusBtn").style.display = "block";
+                if (playedMain && locDone && !skipLoc && !priceDone) document.getElementById("priceBonusBtn").style.display = "block";
+                if (playedMain && priceDone && !rarityDone) document.getElementById("rarityBonusBtn").style.display = "block";
+                if (playedMain && rarityDone && descAvailable && !descDone) document.getElementById("descBonusBtn").style.display = "block";
             } else if (mode === "loc") {
                 bonusMode = true;
-                if (currentMode === "dev") renderDevBonus1();
+                if (skipLoc) renderSkippedSoldAtRound();
+                else if (currentMode === "dev") renderDevBonus1();
                 else renderSoldAtRound(locDone);
-                if (locDone && !priceDone) setNextBonus("price");
+                if (!skipLoc && playedMain && locDone && !priceDone) setNextBonus("price");
             } else if (mode === "price") {
                 wrapper.style.display = "none";
                 if (currentMode === "dev") renderDevBonus2();
                 else { document.getElementById("gameTitle").textContent = "Bonus 2: Guess the Price"; startPriceRound(); }
-                if (priceDone && !rarityDone) setNextBonus("rarity");
+                if (playedMain && priceDone && !rarityDone) setNextBonus("rarity");
             } else if (mode === "rarity") {
                 wrapper.style.display = "none";
                 if (currentMode === "dev") renderDevBonus3();
                 else { document.getElementById("gameTitle").textContent = "Bonus 3: What is the Rarity?"; startRarityRound(); }
+                if (playedMain && rarityDone && descAvailable && !descDone) setNextBonus("desc");
+            } else if (mode === "desc") {
+                wrapper.style.display = "none";
+                if (descAvailable) startDescriptionRound();
+                else switchView("main");
             }
 
             showPlayAgainIfUnlimitedComplete();
-            const active = { main: "nav-main", loc: "nav-loc", price: "nav-price", rarity: "nav-rarity" }[mode];
+            const active = { main: "nav-main", loc: "nav-loc", price: "nav-price", rarity: "nav-rarity", desc: "nav-desc" }[mode];
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.id === active));
         }
 
@@ -292,6 +308,25 @@
             rebuildGrid("loc");
             if (locDone) { showNotification("★ Answer: " + currentAircraft.soldAt); fullReveal(); }
             else { document.getElementById("inputRow").style.display = "flex"; gameOver = false; }
+        }
+
+        function renderSkippedSoldAtRound() {
+            document.getElementById("gameTitle").textContent = "Bonus 1: Where is it sold?";
+            document.getElementById("tileWrapper").style.display = "none";
+            document.getElementById("inputRow").style.display = "none";
+            gameOver = true;
+
+            const msg = document.createElement("div");
+            msg.className = "no-price-msg";
+            msg.textContent = "No Bonus 1 for this vehicle.";
+
+            const btn = document.createElement("button");
+            btn.className = "big-btn";
+            btn.style.display = "block";
+            btn.textContent = "PROCEED";
+            btn.onclick = () => switchView(isPriceDone() ? "rarity" : "price");
+
+            document.getElementById("grid").append(msg, btn);
         }
 
         function renderDevBonus1() {
@@ -532,10 +567,88 @@
             if (isDone) showNotification("★ Rarity: " + correct);
         }
 
+        function getStoredDescriptionGuesses() {
+            if (isUnlimited) return u_desc_guesses;
+            return JSON.parse(localStorage.getItem(`aero_desc_guesses_${currentMode}`) || "[]");
+        }
+
+        function setStoredDescriptionGuesses(guesses) {
+            if (isUnlimited) u_desc_guesses = guesses;
+            else localStorage.setItem(`aero_desc_guesses_${currentMode}`, JSON.stringify(guesses));
+        }
+
+        function getDescriptionOptions() {
+            if (isUnlimited && u_desc_options.length) return u_desc_options;
+            if (!isUnlimited) {
+                const saved = JSON.parse(localStorage.getItem(`aero_desc_options_${currentMode}`) || "[]");
+                if (saved.length) return saved;
+            }
+
+            const correct = currentAircraft.description;
+            const descriptions = [...new Set(DATA
+                .filter(item => item.mode === currentMode && item.description)
+                .map(item => item.description))];
+            let distractors = descriptions.filter(description => description !== correct);
+
+            if (distractors.length < DESCRIPTION_BUTTON_COUNT - 1) {
+                const fallback = [...new Set(DATA
+                    .filter(item => item.mode !== "dev" && item.description)
+                    .map(item => item.description))]
+                    .filter(description => description !== correct && !distractors.includes(description));
+                distractors = distractors.concat(fallback);
+            }
+
+            shuffle(distractors);
+            const options = [correct, ...distractors.slice(0, DESCRIPTION_BUTTON_COUNT - 1)];
+            shuffle(options);
+
+            if (isUnlimited) u_desc_options = options;
+            else localStorage.setItem(`aero_desc_options_${currentMode}`, JSON.stringify(options));
+            return options;
+        }
+
+        function startDescriptionRound() {
+            document.getElementById("gameTitle").textContent = "Bonus 4: Guess the Description";
+            document.getElementById("tileWrapper").style.display = "none";
+            document.getElementById("inputRow").style.display = "none";
+
+            const correct = currentAircraft.description;
+            const isDone = isDescriptionDone();
+            const guesses = getStoredDescriptionGuesses();
+            const container = document.createElement("div");
+            container.className = "price-container";
+
+            getDescriptionOptions().forEach(description => {
+                const b = document.createElement("button");
+                b.className = "price-btn";
+                b.textContent = description;
+                if (isDone || guesses.includes(description)) {
+                    b.disabled = isDone || guesses.includes(description);
+                    if (description === correct && isDone) b.style.background = "#538d4e";
+                    else if (guesses.includes(description) && description !== correct) b.style.background = "#b00020";
+                }
+                b.onclick = () => {
+                    const nextGuesses = [...getStoredDescriptionGuesses(), description];
+                    setStoredDescriptionGuesses(nextGuesses);
+                    const correctGuess = description === correct;
+                    if (correctGuess) confetti();
+                    if (correctGuess || nextGuesses.length >= 2) {
+                        if (isUnlimited) u_desc = true;
+                        else localStorage.setItem(`aero_desc_done_${currentMode}`, today);
+                    }
+                    switchView("desc");
+                };
+                container.appendChild(b);
+            });
+
+            document.getElementById("grid").appendChild(container);
+            if (isDone) showNotification("★ Description: " + correct);
+        }
+
         function showDropdown() {
             const drp = document.getElementById("dropdown"), val = document.getElementById("input").value.toLowerCase();
             let list = [];
-            if (bonusMode) list = currentAircraft.devType === "Badge" ? [...MAN_BADGES].sort() : COUNTRY_DATA.map(c => c.name).sort();
+            if (bonusMode) list = currentAircraft.devType === "Badge" ? [...MAN_BADGES].sort() : COUNTRY_DATA.map(c => c.name).filter(name => name !== NO_SOLD_AT).sort();
             else list = DATA.filter(d => d.mode === currentMode).map(d => d.name).sort();
             drp.innerHTML = "";
             list.filter(n => n.toLowerCase().includes(val)).forEach(name => {
@@ -561,6 +674,7 @@
         document.getElementById("bonusBtn").onclick = openBonus1;
         document.getElementById("priceBonusBtn").onclick = () => switchView("price");
         document.getElementById("rarityBonusBtn").onclick = () => switchView("rarity");
+        document.getElementById("descBonusBtn").onclick = () => switchView("desc");
 
         initDaily();
         setInterval(() => {
