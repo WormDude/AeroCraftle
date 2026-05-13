@@ -122,29 +122,53 @@
             { name: "None / Crafted", flag: "" }
         ];
 
-        const RARITIES = { "Widespread": "#FFFFFF", "Common": "#32CD32", "Uncommon": "#F0E68C", "Rare": "#9370DB", "Ultra Rare": "#0000FF", "Epic": "#FF8C00", "Mythical": "#00FFFF", "Legendary": "#FF0000" };
+        const RARITIES = { "Widespread": "#FFFFFF", "Common": "#32CD32", "Uncommon": "#F0E68C", "Rare": "#9370DB", "Ultra Rare": "#0000FF", "Epic": "#FF8C00"};
         const NO_SOLD_AT = "None / Crafted";
-        const DESCRIPTION_BUTTON_COUNT = 6;
+        const DESCRIPTION_BUTTON_COUNT = 8;
 
-        const DATA = [
+        const STANDARD_AIRCRAFT = [
             { name: "General Dynamics F-16 Fighting Falcon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-20%20065951.png?raw=true", soldAt: "Eisenhardt", price: "21000", rarity: "Uncommon", description: "Multirole Fighter", mode: "standard" },
             { name: "Airbus A300-600ST Beluga", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20063553.png?raw=true", soldAt: "Arleau", price: "74000", rarity: "Rare", description: "Oversize Transport", mode: "standard" },
             { name: "Hughes H-4 Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-01-01%20181938.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Flying Boat", mode: "standard" },
             { name: "Lockheed C-130H Hercules", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-03-05%20172720.png?raw=true", soldAt: "United Isles of Oconia", price: "11600", rarity: "Common", description: "Military Transport", mode: "standard" },
             { name: "Airbus A320-200", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-25%20170554.png?raw=true", soldAt: "Anhedral", price: "19800", rarity: "Widespread", description: "Narrow-Body Airliner", mode: "standard" },
             { name: "High Altitude Surveillance Balloon", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202026-02-26%20062714.png?raw=true", soldAt: "Zhongjing", price: "5000", rarity: "Rare", description: "Totally a Weather Balloon", mode: "standard" },
+            { name: "Antonov An-225 Mriya", image: "https://cdn.wikioasis.org/aeronauticawiki/1/11/Antonov_An-225_Mriya_12.png", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Oversize Transport", mode: "standard" },
+            { name: "Aérospatiale/BAC Concorde", image: "https://cdn.wikioasis.org/aeronauticawiki/c/cb/Aerospatiale_BAC_Concorde_0.png", soldAt: "Anhedral", price: "98000", rarity: "Ultra Rare", description: "Supersonic Airliner", mode: "standard" },
+            { name: "Airbus A380-800", image: "https://cdn.wikioasis.org/aeronauticawiki/7/76/Airbus_A380-800_7.png", soldAt: "Anhedral", price: "68900", rarity: "Rare", description: "Wide-Body Airliner", mode: "standard" },
+            { name: "Boeing C-17A Globemaster III", image: "https://cdn.wikioasis.org/aeronauticawiki/7/75/Boeing_C-17A_Globemaster_III_2.png", soldAt: "United Isles of Oconia", price: "35200", rarity: "Uncommon", description: "Military Transport", mode: "standard" },
+        ];
+
+        const DEV_EVENT_AIRCRAFT = [
             { name: "The Skeld", image: "https://cdn.wikioasis.org/aeronauticawiki/4/4d/Skeld-2.png", devType: "Dev", aircraftType: "Single Engine", mode: "dev" },
             { name: "Death Star", image: "https://cdn.wikioasis.org/aeronauticawiki/a/af/DEATHSTAR.png", devType: "Unobtainable", aircraftType: "Airship", mode: "dev" },
             { name: "Katan X-50 Ranger", image: "https://cdn.wikioasis.org/aeronauticawiki/b/ba/Katan-1.png", devType: "Event", eventTier: "Tier III", aircraftType: "Airship", mode: "dev" },
             { name: "Neucom Incorporated R-505U", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202025-12-31%20102619.png?raw=true", devType: "Event", eventTier: "Tier III", aircraftType: "Supersonic Transport", mode: "dev" },
             { name: "Dornier Seastar", image: "https://raw.githubusercontent.com/WormDude/aeroportle-images/refs/heads/main/Screenshot%202026-03-07%20062208.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/f/fd/1st_Anniversary_badge.png", badgeName: "1 Year Anniversary", devType: "Badge", aircraftType: "Multi Engine", mode: "dev" },
             { name: "Astraeus ADF-340X Relay", image: "https://cdn.wikioasis.org/aeronauticawiki/d/dc/Astraeus_ADF-340X_Relay_1.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/d/d7/Valentines_2024_badge.png", badgeName: "Valentines 2024", devType: "Badge", aircraftType: "Jet Engine", mode: "dev" },
+            { name: "PTDI N-245", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/3/3b/PTDI_N-245_0.png/1920px-PTDI_N-245_0.png", devType: "Unobtainable", aircraftType: "Multi Engine", mode: "dev" },
+            { name: "Tupolev ANT-201 Gorostas", image: "https://cdn.wikioasis.org/aeronauticawiki/0/0d/Goros-1.png", devType: "Unobtainable", aircraftType: "Multi Engine", mode: "dev" },
+            { name: "Hiller Air Tug", image: "https://cdn.wikioasis.org/aeronauticawiki/d/da/Hiller-1.png", devType: "Unobtainable", aircraftType: "Helicopter", mode: "dev" },
+            { name: "DeLorean Time Machine", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/8c/Delorean-1.png/1920px-Delorean-1.png", devType: "Event", eventTier: "Tier II", aircraftType: "VTOL", mode: "dev" },
+        ];
+
+        const BOATS = [
             { name: "Boeing 929 Jetfoil", image: "https://cdn.wikioasis.org/aeronauticawiki/9/97/Boeing_929_Jetfoil_0.png", soldAt: "Zhongjing", price: "54900", rarity: "Uncommon", description: "Passenger Hydrofoil", mode: "boats" },
             { name: "Leo-class Cruise Ship", image: "https://cdn.wikioasis.org/aeronauticawiki/0/08/Leo-class_Cruise_Ship_0.png", soldAt: "Saalhofen", price: "483000", rarity: "Uncommon", description: "Cruise Ship", mode: "boats" },
             { name: "Ulyanovsk-class Aircraft Carrier", image: "https://cdn.wikioasis.org/aeronauticawiki/8/80/Ulyanovsk-class_Aircraft_Carrier.png", soldAt: "Tselinoyarsk", price: "815000", rarity: "Epic", description: "Nuclear-Powered Supercarrier", mode: "boats" },
             { name: "Zumwalt-class Destroyer", image: "https://cdn.wikioasis.org/aeronauticawiki/b/bf/Zumwalt-class_Destroyer_0.png", soldAt: "United Isles of Oconia", price: "283000", rarity: "Ultra Rare", description: "Guided-missile Destroyer", mode: "boats" },
             { name: "Food Boat", image: "https://cdn.wikioasis.org/aeronauticawiki/6/61/Food_Boat_0.png", soldAt: "United Isles of Oconia", price: "500", rarity: "Common", description: "Pontoon Boat", mode: "boats" },
-            { name: "Azzam-class Superyacht", image: "https://cdn.wikioasis.org/aeronauticawiki/d/d2/Azzam-class_Superyacht_5.png", soldAt: "United Isles of Oconia", price: "672000", rarity: "Epic", description: "Superyacht", mode: "boats" }
+            { name: "Azzam-class Superyacht", image: "https://cdn.wikioasis.org/aeronauticawiki/d/d2/Azzam-class_Superyacht_5.png", soldAt: "United Isles of Oconia", price: "672000", rarity: "Epic", description: "Superyacht", mode: "boats" },
+            { name: "MSTX Watertaxi", image: "https://github.com/WormDude/aeroportle-images/blob/main/wtrtxi.png?raw=true", soldAt: "Anhedral", price: "4700", rarity: "Widespread", description: "Water Taxi", mode: "boats" },
+            { name: "Lockheed Sea Shadow", image: "https://github.com/WormDude/aeroportle-images/blob/main/seashdw.png?raw=true", soldAt: "United Isles of Oconia", price: "24000", rarity: "Ultra Rare", description: "Experimental Stealth Ship", mode: "boats" },
+            { name: "Akula-class Submarine", image: "https://github.com/WormDude/aeroportle-images/blob/main/sub%20akula.png?raw=true", soldAt: "Fiskar", price: "286000", rarity: "Rare", description: "Nuclear Submarine", mode: "boats" },
+            { name: "Zodiac RHIB", image: "https://github.com/WormDude/aeroportle-images/blob/main/zdiac.png?raw=true", soldAt: "United Isles of Oconia", price: "1200", rarity: "Widespread", description: "Multi-purpose Craft", mode: "boats" },
+        ];
+
+        const DATA = [
+            ...STANDARD_AIRCRAFT,
+            ...DEV_EVENT_AIRCRAFT,
+            ...BOATS
         ];
 
         const MAN_BADGES = ["1 Year Anniversary", "Halloween 2022", "Valentines 2023", "April Fools 2023", "2nd Year Anniversary!", "VE Day 2023", "100k Favorites!", "Halloween 2023", "10 Million Visits!", "New Years 2024", "Valentines 2024", "3rd Year Anniversary!", "Halloween 2024", "20 Million Visits!", "Proficient Pilot", "Captain", "Circumnavigation", "Space Commander", "Supersonic Transport Mastery"];
@@ -396,7 +420,7 @@
             document.getElementById("inputRow").style.display = "none";
             document.getElementById("tileWrapper").style.display = "none";
             document.getElementById("gameTitle").textContent = "Bonus 3: Aircraft Category?";
-            const options = ["Ultralight", "Single Engine", "Multi Engine", "Jet Engine", "Helicopter", "Airship", "Supersonic Transport", "VTOL", "Boat"];
+            const options = ["Single Engine", "Multi Engine", "Jet Engine", "Helicopter", "Airship", "Supersonic Transport", "VTOL", "Boat"];
             const rarityDone = isRarityDone();
             gameOver = rarityDone;
             renderButtonGrid(options, currentAircraft.aircraftType || "Unknown", rarityDone, choice => {
