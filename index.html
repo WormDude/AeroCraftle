@@ -11,7 +11,11 @@
         body { font-family: 'Inter', sans-serif; background: #121213; color: white; text-align: center; margin: 0; padding-bottom: 50px; }
         #main { max-width: 420px; margin: 40px auto; padding: 0 15px; position: relative; }
         #gameModeContainer { position: absolute; top: -35px; left: 15px; z-index: 100; }
+        #difficultyContainer { position: absolute; top: 0; left: calc(100% + 12px); z-index: 100; text-align: left; background: #1a1a1b; padding: 8px 10px; border-radius: 8px; border: 1px solid #2d2d2f; min-width: 165px; }
         #gameModeSelect { background: #3a3a3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        #difficultyContainer strong { font-size: 11px; display: block; margin-bottom: 6px; opacity: 0.9; }
+        .difficulty-option { display: flex; gap: 8px; align-items: center; margin: 4px 0; font-size: 12px; cursor: pointer; }
+        .difficulty-option input { margin: 0; }
         #modeToggle { position: absolute; top: -35px; right: 15px; background: #538d4e; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; z-index: 10; }
         #timer, #streakBox { margin-bottom: 8px; font-weight: 600; opacity: 0.8; }
         #answerReveal { background: #b59b00; color: black; font-weight: 700; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; }
@@ -20,7 +24,11 @@
         .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .nav-btn.active { background: #538d4e; }
         #tileWrapper { position: relative; width: 100%; margin-bottom: 20px; min-height: 200px; }
-        #baseImage { width: 100%; display: block; border-radius: 10px; background: #1a1a1b; min-height: 200px; object-fit: contain; }
+        #baseImage { width: 100%; display: block; border-radius: 10px; background: #1a1a1b; min-height: 200px; object-fit: contain; transform-origin: center center; }
+        #baseImage.diff-grayscale { filter: grayscale(100%); }
+        #baseImage.diff-blur { filter: blur(3px); }
+        #baseImage.diff-grayscale.diff-blur { filter: grayscale(100%) blur(3px); }
+        #tileWrapper.diff-zoomed { overflow: hidden; border-radius: 10px; }
         #tileGrid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); pointer-events: none; }
         .tile { background: #111; border: 1px solid #000; transition: opacity 0.4s ease; }
         .tile.revealed { opacity: 0; }
@@ -49,6 +57,14 @@
                 <option value="dev">Event/Dev</option>
                 <option value="boats">Boats</option>
             </select>
+        </div>
+        <div id="difficultyContainer">
+            <strong>Difficulty</strong>
+            <label class="difficulty-option"><input type="checkbox" id="diffGrayscale"> Grayscale</label>
+            <label class="difficulty-option"><input type="checkbox" id="diffBlur"> Blur</label>
+            <label class="difficulty-option"><input type="checkbox" id="diffZoom"> Zoom</label>
+            <label class="difficulty-option"><input type="checkbox" id="flipAircraftToggle"> Flip 180°</label>
+            <label class="difficulty-option"><input type="checkbox" id="hideTilesToggle"> Hide tiles</label>
         </div>
         <button id="modeToggle" onclick="toggleMode()">Unlimited Mode</button>
         <h1 id="gameTitle">AeroCraftle</h1>
@@ -122,7 +138,7 @@
             { name: "None / Crafted", flag: "" }
         ];
 
-        const RARITIES = { "Widespread": "#F9F9F9", "Common": "#66FF66", "Uncommon": "#FFFF99", "Rare": "#CC66FF", "Ultra Rare": "#035BB3", "Epic": "#DF9604"};
+        const RARITIES = { "Widespread": "#F9F9F9", "Common": "#66FF66", "Uncommon": "#FFFF99", "Rare": "#CC66FF", "Ultra Rare": "#035BB3", "Epic": "#DF9604" };
         const NO_SOLD_AT = "None / Crafted";
         const DESCRIPTION_BUTTON_COUNT = 8;
 
@@ -157,15 +173,26 @@
             { name: "Tupolev Tu-95MS Bear-H", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/c/c7/Tupolev_Tu-95MS_Bear-H_1.png/1920px-Tupolev_Tu-95MS_Bear-H_1.png", soldAt: "Tselinoyarsk", price: "31000", rarity: "Ultra Rare", description: "Strategic Bomber", mode: "standard" },
             { name: "HyperMach SonicStar", image: "https://cdn.wikioasis.org/aeronauticawiki/8/83/Hypermach_Sonicstar_0.png", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Supersonic Business Jet", mode: "standard" },
             { name: "Northrop Grumman RQ-4B Global Hawk", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/0/0d/Rq4.jpg/1920px-Rq4.jpg", soldAt: "Eisenhardt", price: "27500", rarity: "Epic", description: "Unmanned Surveillance and Reconnaissance Aerial Vehicle", mode: "standard" },
+            { name: "Cessna 152", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20152.png?raw=true", soldAt: "United Isles of Oconia", price: "1250", rarity: "Widespread", description: "General Aviation", mode: "standard" },
+            { name: "Cessna 172", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20172.png?raw=true", soldAt: "United Isles of Oconia", price: "1400", rarity: "Widespread", description: "General Aviation", mode: "standard" },
+            { name: "Boeing 727-200", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20727.png?raw=true", soldAt: "United Isles of Oconia", price: "23400", rarity: "Widespread", description: "Narrow-Body Airliner", mode: "standard" },
+            { name: "Boeing 737-600", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20737-600.png?raw=true", soldAt: "Novacadia", price: "15500", rarity: "Uncommon", description: "Narrow-Body Airliner", mode: "standard" },
+            { name: "Airbus A321MPA", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20a321MPA.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Ultra Rare", description: "Maritime Patrol", mode: "standard" },
+            { name: "BAC 1-11-200", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20bac%201-11-200.png?raw=true", soldAt: "Anhedral", price: "13100", rarity: "Widespread", description: "Regional Airliner", mode: "standard" },
+            { name: "Boom Overture (2016)", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20boom%20-2016.png?raw=true", soldAt: "United Isles of Oconia", price: "90000", rarity: "Ultra Rare", description: "Prototype Supersonic Airliner", mode: "standard" },
+            { name: "Lockheed C-5 Galaxy", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20galaxy.png?raw=true", soldAt: "United Isles of Oconia", price: "135000", rarity: "Ultra Rare", description: "Heavy Military Transport", mode: "standard" },
+            { name: "Avro Lancaster B Mk. I", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20landcaster.png?raw=true", soldAt: "Anhedral", price: "8800", rarity: "Rare", description: "WW2 Heavy Bomber", mode: "standard" },
+            { name: "Sukhoi Su-47 Berkut", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20su47.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Experimental Jet Fighter", mode: "standard" },
+            { name: "Vought V-173", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20vought%20173.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Ultra Rare", description: "Prototype Fighter", mode: "standard" },
         ];
 
-        const DEV_EVENT_AIRCRAFT = [
+const DEV_EVENT_AIRCRAFT = [
             { name: "The Skeld", image: "https://cdn.wikioasis.org/aeronauticawiki/4/4d/Skeld-2.png", devType: "Dev", aircraftType: "Single Engine", mode: "dev" },
             { name: "Death Star", image: "https://cdn.wikioasis.org/aeronauticawiki/a/af/DEATHSTAR.png", devType: "Unobtainable", aircraftType: "Airship", mode: "dev" },
             { name: "Katan X-50 Ranger", image: "https://cdn.wikioasis.org/aeronauticawiki/b/ba/Katan-1.png", devType: "Event", eventTier: "Tier III", aircraftType: "Airship", mode: "dev" },
             { name: "Neucom Incorporated R-505U", image: "https://github.com/WormDude/aeroportle-images/blob/main/Screenshot%202025-12-31%20102619.png?raw=true", devType: "Event", eventTier: "Tier III", aircraftType: "Supersonic Transport", mode: "dev" },
-            { name: "Dornier Seastar", image: "https://raw.githubusercontent.com/WormDude/aeroportle-images/refs/heads/main/Screenshot%202026-03-07%20062208.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/f/fd/1st_Anniversary_badge.png", badgeName: "1 Year Anniversary", devType: "Badge", aircraftType: "Multi Engine", mode: "dev" },
-            { name: "Astraeus ADF-340X Relay", image: "https://cdn.wikioasis.org/aeronauticawiki/d/dc/Astraeus_ADF-340X_Relay_1.png", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/d/d7/Valentines_2024_badge.png", badgeName: "Valentines 2024", devType: "Badge", aircraftType: "Jet Engine", mode: "dev" },
+            { name: "Dornier Seastar", image: "https://github.com/WormDude/aeroportle-images/blob/main/seastr.png?raw=true", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/f/fd/1st_Anniversary_badge.png", badgeName: "1 Year Anniversary", devType: "Badge", aircraftType: "Multi Engine", mode: "dev" },
+            { name: "Astraeus ADF-340X Relay", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20relay.png?raw=true", badgeIcon: "https://cdn.wikioasis.org/aeronauticawiki/d/d7/Valentines_2024_badge.png", badgeName: "Valentines 2024", devType: "Badge", aircraftType: "Jet Engine", mode: "dev" },
             { name: "PTDI N-245", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/3/3b/PTDI_N-245_0.png/1920px-PTDI_N-245_0.png", devType: "Unobtainable", aircraftType: "Multi Engine", mode: "dev" },
             { name: "Tupolev ANT-201 Gorostas", image: "https://cdn.wikioasis.org/aeronauticawiki/0/0d/Goros-1.png", devType: "Unobtainable", aircraftType: "Multi Engine", mode: "dev" },
             { name: "Hiller Air Tug", image: "https://cdn.wikioasis.org/aeronauticawiki/d/da/Hiller-1.png", devType: "Unobtainable", aircraftType: "Helicopter", mode: "dev" },
@@ -177,10 +204,10 @@
             { name: "Airbus A340 E-59F Susanowo", image: "https://cdn.wikioasis.org/aeronauticawiki/6/69/Airbus_A340_E-59F_Susanowo_1.png", devType: "Event", eventTier: "Tier IV", aircraftType: "Jet Engine", mode: "dev" },
             { name: "ScorpioPilot's Classic ROBLOX Plane", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/5/5a/Classicplane-2.png/1920px-Classicplane-2.png", devType: "Event", eventTier: "Tier II", aircraftType: "Jet Engine", mode: "dev" },
             { name: "Mikoyan-Gurevich MiG-15 - Eggplane", image: "https://cdn.wikioasis.org/aeronauticawiki/thumb/8/83/Migegg-1.png/300px-Migegg-1.png", devType: "Event", eventTier: "Tier I", aircraftType: "Jet Engine", mode: "dev" },
-            { name: "FV4034 Challenger II", image: "https://cdn.wikioasis.org/aeronauticawiki/5/55/FV4034_Challenger_II_2.png", devType: "Event", eventTier: "Tier II", aircraftType: "Jet Engine", mode: "dev" },
+            { name: "FV4034 Challenger II", image: "https://cdn.wikioasis.org/aeronauticawiki/5/55/FV4034_Challenger_II_2.png", devType: "Event", eventTier: "Tier II", aircraftType: "Jet Engine", mode: "dev" }
         ];
 
-        const BOATS = [
+const BOATS = [
             { name: "Boeing 929 Jetfoil", image: "https://cdn.wikioasis.org/aeronauticawiki/9/97/Boeing_929_Jetfoil_0.png", soldAt: "Zhongjing", price: "54900", rarity: "Uncommon", description: "Passenger Hydrofoil", mode: "boats" },
             { name: "Leo-class Cruise Ship", image: "https://cdn.wikioasis.org/aeronauticawiki/0/08/Leo-class_Cruise_Ship_0.png", soldAt: "Saalhofen", price: "483000", rarity: "Uncommon", description: "Cruise Ship", mode: "boats" },
             { name: "Ulyanovsk-class Aircraft Carrier", image: "https://cdn.wikioasis.org/aeronauticawiki/8/80/Ulyanovsk-class_Aircraft_Carrier.png", soldAt: "Tselinoyarsk", price: "815000", rarity: "Epic", description: "Nuclear-Powered Supercarrier", mode: "boats" },
@@ -199,10 +226,10 @@
             { name: "Izumo-class Destroyer", image: "https://cdn.wikioasis.org/aeronauticawiki/6/66/Izumo-class_Destroyer_0.png", soldAt: "Eiko", price: "330000", rarity: "Rare", description: "Aircraft-carrying Multi-role Cruiser", mode: "boats" },
             { name: "Djahazi Container Vessel", image: "https://cdn.wikioasis.org/aeronauticawiki/1/1c/Djahazi_Container_Vessel_0.png", soldAt: "Alavega", price: "1510", rarity: "Widespread", description: "Container Transporter", mode: "boats" },
             { name: "Farman Ricocheur", image: "https://cdn.wikioasis.org/aeronauticawiki/4/4c/Farman_Ricocheur_0.png", soldAt: "Arleau", price: "12000", rarity: "Ultra Rare", description: "Passenger Airboat", mode: "boats" },
-            { name: "Riverine Monitor", image: "https://cdn.wikioasis.org/aeronauticawiki/8/87/Riverine_Monitor_0.png", soldAt: "Mengtai", price: "4750", rarity: "Widespread", description: "River Patrol Vessel", mode: "boats" },
+            { name: "Riverine Monitor", image: "https://cdn.wikioasis.org/aeronauticawiki/8/87/Riverine_Monitor_0.png", soldAt: "Mengtai", price: "4750", rarity: "Widespread", description: "River Patrol Vessel", mode: "boats" }
         ];
 
-        const DATA = [
+const DATA = [
             ...STANDARD_AIRCRAFT,
             ...DEV_EVENT_AIRCRAFT,
             ...BOATS
@@ -212,29 +239,149 @@
         const STREAK_UI_LABEL = { standard: "Standard", dev: "Dev/Event", boats: "Boats" };
 
         let today, currentAircraft, gameOver = false, bonusMode = false, priceRanges = [], isUnlimited = false;
-        let currentMode = "standard";
+        let currentMode = "standard", currentView = "main";
+        let difficultySettings = { grayscale: false, blur: false, zoom: false, flip: false, hideTiles: false };
+        let unlimitedStreakByMode = { standard: 0, dev: 0, boats: 0 };
         let u_played = false, u_loc = false, u_price = false, u_rarity = false, u_desc = false;
         let u_history_main = [], u_history_loc = [], u_loc_guess = "", u_price_guess = "", u_rarity_guess = "", u_desc_guesses = [], u_desc_options = [];
         let u_recent_answers_by_mode = { standard: [], dev: [], boats: [] }, hiddenPoolMain = [], hiddenPoolLoc = [];
 
         function streakKey(mode) { return "aero_streak_" + mode; }
+        function streakPlayedKey(mode) { return "aero_played_day_" + mode; }
         function getRecentQueue() { if (!u_recent_answers_by_mode[currentMode]) u_recent_answers_by_mode[currentMode] = []; return u_recent_answers_by_mode[currentMode]; }
         function devPriceDoneRead() { return isUnlimited ? u_price : (localStorage.getItem("aero_price_done_" + currentMode) === today); }
 
+        function getAnswerHistoryKey(mode) { return "aero_answer_history_" + mode; }
+        function readAnswerHistory(mode) { return JSON.parse(localStorage.getItem(getAnswerHistoryKey(mode)) || "[]"); }
+        function writeAnswerHistory(mode, history) { localStorage.setItem(getAnswerHistoryKey(mode), JSON.stringify(history)); }
+        function pruneAndGetRecentAnswerNames(mode, maxAgeDays = 10) {
+            const now = new Date();
+            const history = readAnswerHistory(mode).filter(entry => {
+                const age = (now - new Date(entry.date)) / 86400000;
+                return Number.isFinite(age) && age <= maxAgeDays;
+            });
+            writeAnswerHistory(mode, history);
+            return history.map(entry => entry.name);
+        }
+        function trackAnswer(mode, name) {
+            const history = readAnswerHistory(mode);
+            history.push({ name, date: new Date().toISOString() });
+            writeAnswerHistory(mode, history);
+        }
+        function getUtcDateKey() {
+            const d = new Date();
+            return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+        }
+        function chooseDailyAircraft(mode) {
+            const pool = DATA.filter(d => d.mode === mode);
+            const seed = `${today}|${mode}|universal`;
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+            const index = Math.abs(hash) % pool.length;
+            return pool[index];
+        }
+
         function refreshStreakDisplay() {
             const lbl = STREAK_UI_LABEL[currentMode] || currentMode;
+            if (isUnlimited) {
+                const u = unlimitedStreakByMode[currentMode] || 0;
+                document.getElementById("streakBox").textContent = "🔥 Unlimited " + lbl + " streak: " + u;
+                return;
+            }
             const n = localStorage.getItem(streakKey(currentMode)) || "0";
             document.getElementById("streakBox").textContent = "🔥 " + lbl + " streak: " + n;
+        }
+        function enforceMissedDayStreakReset(mode) {
+            const lastSeen = localStorage.getItem("aero_last_date_" + mode);
+            if (!lastSeen || lastSeen === today) return;
+            const playedDay = localStorage.getItem(streakPlayedKey(mode));
+            if (playedDay !== lastSeen) localStorage.setItem(streakKey(mode), "0");
         }
 
         function changeMode(val) { currentMode = val; if (isUnlimited) resetUnlimited(); else initDaily(); }
 
+        function persistDifficultySettings() { localStorage.setItem("aero_difficulty_settings", JSON.stringify(difficultySettings)); }
+        function readDifficultySettings() {
+            try {
+                const raw = JSON.parse(localStorage.getItem("aero_difficulty_settings") || "{}");
+                difficultySettings = {
+                    grayscale: Boolean(raw.grayscale),
+                    blur: Boolean(raw.blur),
+                    zoom: Boolean(raw.zoom),
+                    flip: Boolean(raw.flip),
+                    hideTiles: Boolean(raw.hideTiles)
+                };
+            } catch (_) {}
+        }
+        function bindDifficultyControls() {
+            const map = [
+                ["diffGrayscale", "grayscale"],
+                ["diffBlur", "blur"],
+                ["diffZoom", "zoom"],
+                ["flipAircraftToggle", "flip"],
+                ["hideTilesToggle", "hideTiles"]
+            ];
+            map.forEach(([id, key]) => {
+                const el = document.getElementById(id);
+                el.checked = difficultySettings[key];
+                el.addEventListener("change", () => {
+                    difficultySettings[key] = el.checked;
+                    persistDifficultySettings();
+                    applyDifficultyFilter();
+                });
+            });
+        }
+
+        function applyDifficultyFilter() {
+            const img = document.getElementById("baseImage");
+            const wrapper = document.getElementById("tileWrapper");
+            img.classList.remove("diff-grayscale", "diff-blur");
+            wrapper.classList.remove("diff-zoomed");
+            document.getElementById("tileGrid").style.display = difficultySettings.hideTiles ? "none" : "grid";
+            if (difficultySettings.grayscale) img.classList.add("diff-grayscale");
+            if (difficultySettings.blur) img.classList.add("diff-blur");
+            if (difficultySettings.zoom) wrapper.classList.add("diff-zoomed");
+            const transforms = [];
+            if (difficultySettings.zoom) transforms.push("scale(2.35)");
+            if (difficultySettings.flip) transforms.push("rotate(180deg)");
+            img.style.transform = transforms.length ? transforms.join(" ") : "";
+        }
+
+        function clearDailyRoundState(mode) {
+            [
+                `aero_guesses_main_${mode}`,
+                `aero_guesses_loc_${mode}`,
+                `aero_played_day_${mode}`,
+                `aero_loc_done_${mode}`,
+                `aero_loc_guess_${mode}`,
+                `aero_price_done_${mode}`,
+                `aero_price_guess_${mode}`,
+                `aero_rarity_done_${mode}`,
+                `aero_rarity_guess_${mode}`,
+                `aero_desc_done_${mode}`,
+                `aero_desc_guesses_${mode}`,
+                `aero_desc_options_${mode}`
+            ].forEach(k => localStorage.removeItem(k));
+        }
+
         function initDaily() {
-            today = new Date().toDateString();
-            if (localStorage.getItem("aero_last_date") !== today) { localStorage.clear(); localStorage.setItem("aero_last_date", today); }
+            today = getUtcDateKey();
+            const lastDate = localStorage.getItem("aero_last_date_" + currentMode);
+            if (lastDate && lastDate !== today) clearDailyRoundState(currentMode);
+            enforceMissedDayStreakReset(currentMode);
+            const dailyKey = `aero_daily_answer_${currentMode}_${today}`;
+            const savedName = localStorage.getItem(dailyKey);
             const pool = DATA.filter(d => d.mode === currentMode);
-            const index = Math.floor((new Date() - new Date(2024, 0, 1)) / 86400000) % pool.length;
-            currentAircraft = pool[index];
+
+            if (savedName) {
+                currentAircraft = pool.find(item => item.name === savedName) || chooseDailyAircraft(currentMode);
+            } else {
+                currentAircraft = chooseDailyAircraft(currentMode);
+                localStorage.setItem(dailyKey, currentAircraft.name);
+            }
+
+            localStorage.setItem("aero_last_date", today);
+            localStorage.setItem("aero_last_date_" + currentMode, today);
             refreshStreakDisplay();
             generateDailyPriceRanges();
             resetTilePools();
@@ -246,16 +393,21 @@
             document.getElementById("modeToggle").textContent = isUnlimited ? "Daily Mode" : "Unlimited Mode";
             document.getElementById("timer").style.display = isUnlimited ? "none" : "block";
             if (isUnlimited) { u_recent_answers_by_mode = { standard: [], dev: [], boats: [] }; resetUnlimited(); }
-            else initDaily();
+            else { unlimitedStreakByMode[currentMode] = 0; initDaily(); }
+            refreshStreakDisplay();
         }
 
         function resetUnlimited() {
             if (isUnlimited) {
                 const pool = DATA.filter(d => d.mode === currentMode);
                 const recent = getRecentQueue();
+                const recentTenDayNames = new Set(pruneAndGetRecentAnswerNames(currentMode, 10));
+                let candidates = pool.filter(item => !recentTenDayNames.has(item.name));
+                if (!candidates.length) candidates = pool;
                 let newAircraft;
-                do { newAircraft = pool[Math.floor(Math.random() * pool.length)]; } while (recent.includes(newAircraft.name) && pool.length > 5);
+                do { newAircraft = candidates[Math.floor(Math.random() * candidates.length)]; } while (recent.includes(newAircraft.name) && candidates.length > 5);
                 currentAircraft = newAircraft;
+                trackAnswer(currentMode, currentAircraft.name);
                 recent.push(currentAircraft.name);
                 if (recent.length > 5) recent.shift();
                 u_played = false; u_loc = false; u_price = false; u_rarity = false; u_desc = false;
@@ -304,6 +456,8 @@
         }
 
         function switchView(mode) {
+            currentView = mode;
+            applyDifficultyFilter();
             document.getElementById("grid").innerHTML = "";
             document.getElementById("dropdown").innerHTML = "";
             document.getElementById("inputRow").style.display = "none";
@@ -533,7 +687,11 @@
                 const histLen = !bonusMode ? u_history_main.length : u_history_loc.length;
                 if (isCorrect || histLen >= 6) {
                     if (isCorrect) confetti();
-                    if (!bonusMode) u_played = true;
+                    if (!bonusMode) {
+                        u_played = true;
+                        unlimitedStreakByMode[currentMode] = isCorrect ? ((unlimitedStreakByMode[currentMode] || 0) + 1) : 0;
+                        refreshStreakDisplay();
+                    }
                     else if (currentMode === "dev" && currentAircraft.devType === "Badge") { u_price = true; gameOver = true; switchView("price"); cleanupGuessInput(input); return; }
                     else u_loc = true;
                     gameOver = true;
@@ -547,7 +705,7 @@
                 if (isCorrect || history.length >= 6) {
                     if (isCorrect) confetti();
                     if (!bonusMode) {
-                        localStorage.setItem("aero_played_day" + modeSuffix, today);
+                        localStorage.setItem(streakPlayedKey(currentMode), today);
                         const sk = streakKey(currentMode);
                         localStorage.setItem(sk, isCorrect ? String(parseInt(localStorage.getItem(sk) || "0", 10) + 1) : "0");
                         refreshStreakDisplay();
@@ -573,6 +731,7 @@
                 if (currentMode === "dev" && currentAircraft.devType === "Badge") img.src = currentAircraft.badgeIcon;
                 else { const c = COUNTRY_DATA.find(c => c.name === currentAircraft.soldAt); img.src = (c && c.flag) ? c.flag : "https://github.com/WormDude/AeroCraftle/blob/main/Screenshot%202026-05-03%20151543.png?raw=true"; }
             } else img.src = currentAircraft.image;
+            applyDifficultyFilter();
             const tg = document.getElementById("tileGrid");
             tg.innerHTML = "";
             for (let i = 0; i < 6; i++) { const t = document.createElement("div"); t.className = "tile"; tg.appendChild(t); }
@@ -737,13 +896,16 @@
         document.getElementById("rarityBonusBtn").onclick = () => switchView("rarity");
         document.getElementById("descBonusBtn").onclick = () => switchView("desc");
 
+        readDifficultySettings();
+        bindDifficultyControls();
         initDaily();
         setInterval(() => {
             if (isUnlimited) return;
             const next = new Date();
             next.setHours(24, 0, 0, 0);
             const diff = next - new Date();
-            if (diff <= 0) location.reload();
+            const nowDay = getUtcDateKey();
+            if (nowDay !== today) { initDaily(); return; }
             const h = String(Math.floor(diff / 3600000)).padStart(2, '0'), m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0'), s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
             document.getElementById("timer").textContent = `Next aircraft in: ${h}:${m}:${s}`;
         }, 1000);
