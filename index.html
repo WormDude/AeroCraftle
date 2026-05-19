@@ -183,7 +183,7 @@
             { name: "Lockheed C-5 Galaxy", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20galaxy.png?raw=true", soldAt: "United Isles of Oconia", price: "135000", rarity: "Ultra Rare", description: "Heavy Military Transport", mode: "standard" },
             { name: "Avro Lancaster B Mk. I", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20landcaster.png?raw=true", soldAt: "Anhedral", price: "8800", rarity: "Rare", description: "WW2 Heavy Bomber", mode: "standard" },
             { name: "Sukhoi Su-47 Berkut", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20su47.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Epic", description: "Experimental Jet Fighter", mode: "standard" },
-            { name: "Vought V-173", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20vought%20173.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Ultra Rare", description: "Prototype Fighter", mode: "standard" },
+            { name: "Vought V-173", image: "https://github.com/WormDude/aeroportle-images/blob/main/ss%20vought%20173.png?raw=true", soldAt: "None / Crafted", price: "", rarity: "Ultra Rare", description: "Prototype Fighter", mode: "standard" }
         ];
 
 const DEV_EVENT_AIRCRAFT = [
@@ -268,17 +268,18 @@ const DATA = [
             history.push({ name, date: new Date().toISOString() });
             writeAnswerHistory(mode, history);
         }
+        function chooseDeterministicFromPool(pool, seed) {
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+            return pool[Math.abs(hash) % pool.length];
+        }
         function getUtcDateKey() {
             const d = new Date();
             return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
         }
         function chooseDailyAircraft(mode) {
             const pool = DATA.filter(d => d.mode === mode);
-            const seed = `${today}|${mode}|universal`;
-            let hash = 0;
-            for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-            const index = Math.abs(hash) % pool.length;
-            return pool[index];
+            return chooseDeterministicFromPool(pool, `${today}|${mode}|universal`);
         }
 
         function refreshStreakDisplay() {
@@ -393,7 +394,12 @@ const DATA = [
             document.getElementById("modeToggle").textContent = isUnlimited ? "Daily Mode" : "Unlimited Mode";
             document.getElementById("timer").style.display = isUnlimited ? "none" : "block";
             if (isUnlimited) { u_recent_answers_by_mode = { standard: [], dev: [], boats: [] }; resetUnlimited(); }
-            else { unlimitedStreakByMode[currentMode] = 0; initDaily(); }
+            else {
+                unlimitedStreakByMode[currentMode] = 0;
+                u_played = false; u_loc = false; u_price = false; u_rarity = false; u_desc = false;
+                u_history_main = []; u_history_loc = []; u_loc_guess = ""; u_price_guess = ""; u_rarity_guess = ""; u_desc_guesses = []; u_desc_options = [];
+                initDaily();
+            }
             refreshStreakDisplay();
         }
 
