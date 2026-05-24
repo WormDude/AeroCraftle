@@ -277,6 +277,11 @@ const DATA = [
             const d = new Date();
             return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
         }
+        function daysBetweenUtc(fromDay, toDay) {
+            const from = new Date(fromDay + "T00:00:00Z");
+            const to = new Date(toDay + "T00:00:00Z");
+            return Math.floor((to - from) / 86400000);
+        }
         function chooseDailyAircraft(mode) {
             const pool = DATA.filter(d => d.mode === mode);
             return chooseDeterministicFromPool(pool, `${today}|${mode}|universal`);
@@ -293,10 +298,9 @@ const DATA = [
             document.getElementById("streakBox").textContent = "🔥 " + lbl + " streak: " + n;
         }
         function enforceMissedDayStreakReset(mode) {
-            const lastSeen = localStorage.getItem("aero_last_date_" + mode);
-            if (!lastSeen || lastSeen === today) return;
             const playedDay = localStorage.getItem(streakPlayedKey(mode));
-            if (playedDay !== lastSeen) localStorage.setItem(streakKey(mode), "0");
+            if (!playedDay) return;
+            if (daysBetweenUtc(playedDay, today) > 1) localStorage.setItem(streakKey(mode), "0");
         }
 
         function changeMode(val) { currentMode = val; if (isUnlimited) resetUnlimited(); else initDaily(); }
@@ -711,9 +715,15 @@ const DATA = [
                 if (isCorrect || history.length >= 6) {
                     if (isCorrect) confetti();
                     if (!bonusMode) {
-                        localStorage.setItem(streakPlayedKey(currentMode), today);
                         const sk = streakKey(currentMode);
-                        localStorage.setItem(sk, isCorrect ? String(parseInt(localStorage.getItem(sk) || "0", 10) + 1) : "0");
+                        const playedKey = streakPlayedKey(currentMode);
+                        const previousPlayedDay = localStorage.getItem(playedKey);
+                        if (isCorrect) {
+                            const current = parseInt(localStorage.getItem(sk) || "0", 10);
+                            const shouldContinue = previousPlayedDay && daysBetweenUtc(previousPlayedDay, today) === 1;
+                            localStorage.setItem(sk, shouldContinue ? String(current + 1) : "1");
+                        } else localStorage.setItem(sk, "0");
+                        localStorage.setItem(playedKey, today);
                         refreshStreakDisplay();
                     } else if (currentMode === "dev" && currentAircraft.devType === "Badge") {
                         localStorage.setItem("aero_price_done" + modeSuffix, today);
