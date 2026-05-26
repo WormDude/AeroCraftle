@@ -248,6 +248,7 @@ const DATA = [
 
         function streakKey(mode) { return "aero_streak_" + mode; }
         function streakPlayedKey(mode) { return "aero_played_day_" + mode; }
+        function streakCompletedKey(mode) { return "aero_streak_completed_day_" + mode; }
         function getRecentQueue() { if (!u_recent_answers_by_mode[currentMode]) u_recent_answers_by_mode[currentMode] = []; return u_recent_answers_by_mode[currentMode]; }
         function devPriceDoneRead() { return isUnlimited ? u_price : (localStorage.getItem("aero_price_done_" + currentMode) === today); }
 
@@ -298,9 +299,10 @@ const DATA = [
             document.getElementById("streakBox").textContent = "🔥 " + lbl + " streak: " + n;
         }
         function enforceMissedDayStreakReset(mode) {
-            const playedDay = localStorage.getItem(streakPlayedKey(mode));
-            if (!playedDay) return;
-            if (daysBetweenUtc(playedDay, today) > 1) localStorage.setItem(streakKey(mode), "0");
+            const lastSeen = localStorage.getItem("aero_last_date_" + mode);
+            if (!lastSeen || lastSeen === today) return;
+            const completedDay = localStorage.getItem(streakCompletedKey(mode));
+            if (completedDay !== lastSeen) localStorage.setItem(streakKey(mode), "0");
         }
 
         function changeMode(val) { currentMode = val; if (isUnlimited) resetUnlimited(); else initDaily(); }
@@ -717,11 +719,13 @@ const DATA = [
                     if (!bonusMode) {
                         const sk = streakKey(currentMode);
                         const playedKey = streakPlayedKey(currentMode);
-                        const previousPlayedDay = localStorage.getItem(playedKey);
+                        const completedKey = streakCompletedKey(currentMode);
+                        const previousCompletedDay = localStorage.getItem(completedKey);
                         if (isCorrect) {
                             const current = parseInt(localStorage.getItem(sk) || "0", 10);
-                            const shouldContinue = previousPlayedDay && daysBetweenUtc(previousPlayedDay, today) === 1;
+                            const shouldContinue = previousCompletedDay && daysBetweenUtc(previousCompletedDay, today) === 1;
                             localStorage.setItem(sk, shouldContinue ? String(current + 1) : "1");
+                            localStorage.setItem(completedKey, today);
                         } else localStorage.setItem(sk, "0");
                         localStorage.setItem(playedKey, today);
                         refreshStreakDisplay();
